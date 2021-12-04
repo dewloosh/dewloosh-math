@@ -31,7 +31,8 @@ setup(
     description="A numerical math library for applications in various bramches of science and engineering",
     long_description=long_description,   
     long_description_content_type="text/markdown",
-    namespace_packages=find_namespace_packages(include=['dewloosh.*']),   
+	packages=find_packages('src.dewloosh.math'),
+    namespace_packages=find_namespace_packages(include=['dewloosh.*']),
     classifiers=[
         'Development Status :: 3 - Alpha',     
         'License :: OSI Approved :: MIT License',   
