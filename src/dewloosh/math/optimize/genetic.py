@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from abc import abstractmethod
 import numpy as np
 
@@ -9,7 +10,7 @@ def even(n): return n % 2 == 0
 def odd(n): return not even(n)
 
 
-class GeneticAlgorithm(object):
+class GeneticAlgorithm:
     """
     Binary Generic algorithm for continuous problems.
 

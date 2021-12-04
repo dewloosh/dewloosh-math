@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from polydata.math.linalg.frontal.proc import frontal_sym_bulk_uniform
 from polydata.math.linalg.frontal.postproc import backsub_fr

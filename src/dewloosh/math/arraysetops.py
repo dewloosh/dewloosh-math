@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from polydata.math.array import flatten2dC
-from polydata.math.array import count_cols
+from dewloosh.math.array import flatten2dC
+from dewloosh.math.array import count_cols
 import numpy as np
 from numpy import ndarray
 from awkward import Array as akarray

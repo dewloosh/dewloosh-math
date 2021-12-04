@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-from spdata.utils import count_cols
+from dewloosh.math.linalg.sparse.utils import count_cols
 import numpy as np
 from numpy import concatenate as join
 import awkward as ak
 from awkward import unflatten as build
 import numpy as np
-#from operator import add
-#from functools import reduce
 
 
 def shape(arr): return arr.shape[:2]
@@ -35,6 +33,8 @@ class JaggedArray(ak.Array):
             # NOTE This line is one of the most unreadable things I've ever done.
             data = build(join(list(map(flatten, data))), join(list(map(cut, map(shape, data)))))
             # NOTE - implementaion 2
+            #from operator import add
+            #from functools import reduce
             # > This also works, but requires data to jump back and forth just to
             # > have a merged list of lists. It also requires to add nested python lists,
             # > which is probably not the quickest operation in the computational world.

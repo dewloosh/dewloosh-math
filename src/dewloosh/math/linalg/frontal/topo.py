@@ -1,6 +1,6 @@
 import numpy as np
 from numba import jit
-from polydata.math.linalg.sparse import CSR
+from dewloosh.math.linalg.sparse import CSR
 
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)

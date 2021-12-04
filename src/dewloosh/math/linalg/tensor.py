@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 import numpy as np
-from polydata.math.linalg.frame import ReferenceFrame
-from polydata.tools import latinrange
-from polydata.math.linalg.vector import Vector
-from polydata.math.linalg._tensop import tr_3333
-from polydata.math.linalg._tensop import tr_3333_jit
+from dewloosh.math.linalg.frame import ReferenceFrame
+from dewloosh.core.tools import latinrange
+from dewloosh.math.linalg.vector import Vector
+from dewloosh.math.linalg._tensop import tr_3333
+from dewloosh.math.linalg._tensop import tr_3333_jit
 import sympy as sy
 
 

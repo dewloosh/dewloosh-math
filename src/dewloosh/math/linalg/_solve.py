@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from numpy.linalg import LinAlgError
 from numba import njit, config, guvectorize

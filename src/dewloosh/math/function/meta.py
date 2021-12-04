@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from dewloosh.abc import ABCMeta_Weak
+from dewloosh.core.abc import ABCMeta_Weak
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import lambdify, derive_by_array, symbols, Expr
 from sympy.core.numbers import One

@@ -6,7 +6,7 @@ import numpy as np
 from functools import reduce
 from itertools import product
 import operator
-from polydata.core.abc import ABC_Safe
+from dewloosh.core.abc import ABC_Safe
 
 __all__ = ['Scalar', 'List', 'Array']
 
@@ -215,7 +215,7 @@ class List(list):
         return self._dtype
 
     @property
-    def Arrayial(self):
+    def array_like(self):
         shp = self.shape
         return not List.nested(shp)
 

@@ -4,7 +4,7 @@ import networkx as ntx
 from numba import jit
 from numba.types import int32, int64, Array
 from numba.typed import Dict
-from spdata.csr import csr_matrix
+from dewloosh.math.linalg.sparse.csr import csr_matrix
 
 
 class Graph(ntx.Graph):

@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import sympy as sy
-from polydata.math import Function, InEquality, Equality, VariableManager
-from polydata.tools import getasany
+from dewloosh.math import Function, InEquality, Equality, VariableManager
+from polydata.core.tools import getasany
 from collections import defaultdict, Iterable
-from polydata.math.function.relation import Relations, Relation
-from polydata.math.function.meta import coefficients
+from dewloosh.math.function.relation import Relations, Relation
+from dewloosh.math.function.meta import coefficients
 from sympy.utilities.iterables import multiset_permutations
 from numpy.linalg import LinAlgError
 from copy import copy

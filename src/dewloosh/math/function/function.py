@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from polydata.math.function.meta import MetaFunction, substitute
+from dewloosh.math.function.meta import MetaFunction, substitute
 from typing import TypeVar, Callable
-from polydata.tools import getasany
+from dewloosh.core.tools import getasany
 import sympy as sy
 from sympy import Expr, degree, symbols, latex, lambdify
 from sympy.core.numbers import One

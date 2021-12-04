@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from sympy.physics.vector import ReferenceFrame as RFrame
 
 
-class ReferenceFrame(object):
+class ReferenceFrame:
 
     def __init__(self, axes=None, parent=None, *args, order='col',
                  name=None, dim=3, **kwargs):

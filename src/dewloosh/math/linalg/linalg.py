@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from numba import njit, prange, guvectorize
 __cache = True
@@ -206,7 +207,7 @@ def normalize(A):
 
 
 if __name__ == '__main__':
-    from polydata.math.array import repeat
+    from dewloosh.math.array import repeat
     from time import time
 
     p1 = np.array([0., 0., 0.])

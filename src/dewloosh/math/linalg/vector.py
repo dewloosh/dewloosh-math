@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 import numpy as np
-from polydata.math.linalg.frame import ReferenceFrame
+from dewloosh.math.linalg.frame import ReferenceFrame
 
 
 class Vector(object):

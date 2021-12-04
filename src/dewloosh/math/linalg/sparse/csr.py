@@ -5,7 +5,7 @@ from numba.extending import typeof_impl, models, make_attribute_wrapper, \
     register_model, box, unbox, NativeValue, overload_method
 from scipy.sparse import issparse
 from scipy.sparse import csr_matrix as csr_scipy
-from spdata.utils import get_shape_sp
+from dewloosh.math.linalg.sparse.utils import get_shape_sp
 
 
 __all__ = ['csr_matrix']
