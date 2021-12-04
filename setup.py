@@ -24,14 +24,14 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 setup(
-	name="dewloosh.core",
+	name="dewloosh.math",
     version=get_version("src/Dewloosh/math/__init__.py"),                        
     author="dewloosh",
     author_email = 'dewloosh@gmail.com',                   
     description="A numerical math library for applications in various bramches of science and engineering",
     long_description=long_description,   
     long_description_content_type="text/markdown",
-	packages=find_packages('src.dewloosh.math'),
+	#packages=find_packages('src.dewloosh.math'),
     namespace_packages=find_namespace_packages(include=['dewloosh.*']),
     classifiers=[
         'Development Status :: 3 - Alpha',     
