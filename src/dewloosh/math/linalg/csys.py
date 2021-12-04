@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from polydata.math.linalg.frame import ReferenceFrame
+from dewloosh.math.linalg.frame import ReferenceFrame
 import numpy as np
 
 

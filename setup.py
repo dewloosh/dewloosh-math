@@ -25,13 +25,12 @@ with open('requirements.txt') as f:
 
 setup(
 	name="dewloosh.core",
-    version=get_version("src/Dewloosh/core/__init__.py"),                        
+    version=get_version("src/Dewloosh/math/__init__.py"),                        
     author="dewloosh",
     author_email = 'dewloosh@gmail.com',                   
-    description="A simple namespace distro",
+    description="A numerical math library for applications in various bramches of science and engineering",
     long_description=long_description,   
     long_description_content_type="text/markdown",
-	#packages=find_packages('src.dewloosh.core'),
     namespace_packages=find_namespace_packages(include=['dewloosh.*']),   
     classifiers=[
         'Development Status :: 3 - Alpha',     

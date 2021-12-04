@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit
-from polydata.math.linalg.sparse import CSR
-from polydata.math.topology.graph import pseudo_peripheral_nodes
+from dewloosh.math.linalg.sparse import CSR
+from dewloosh.math.topology.graph import pseudo_peripheral_nodes
 
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)

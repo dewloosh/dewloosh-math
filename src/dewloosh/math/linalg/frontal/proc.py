@@ -1,8 +1,8 @@
 import numpy as np
 from numba import jit
-from polydata.math.linalg.frontal.frutils import max_frontwidth_bulk, \
+from dewloosh.math.linalg.frontal.frutils import max_frontwidth_bulk, \
     flatsize_sym, flatind_sym
-from polydata.math.linalg.frontal.topo import signed_topo_bulk
+from dewloosh.math.linalg.frontal.topo import signed_topo_bulk
 
 
 @jit(nopython=True, nogil=True, cache=True)
