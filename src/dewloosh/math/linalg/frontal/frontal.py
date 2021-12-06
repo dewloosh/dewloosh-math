@@ -38,7 +38,7 @@ def frsolve(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray = None,
 if __name__ == '__main__':
     from polydata.mechanics.fem import Uniform3D
     from polydata.mechanics.material.hooke import Hooke
-    from polydata.math.linalg import solve
+    from dewloosh.math.linalg import solve
     from polydata.core import NestedDefaultDict
     import numpy as np
     from scipy.sparse import coo_matrix

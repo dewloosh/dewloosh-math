@@ -185,9 +185,9 @@ def reverse_mapping(iarray: np.ndarray):
 
 if __name__ == '__main__':
     from polydata.mechanics.fem import Uniform3D
-    from polydata.math.linalg.frontal.frutils import max_frontwidth_bulk
-    from polydata.math.linalg.frontal.topo import signed_topo_bulk
-    from polydata.math.linalg.sparse import CSR
+    from dewloosh.math.linalg.frontal.frutils import max_frontwidth_bulk
+    from dewloosh.math.linalg.frontal.topo import signed_topo_bulk
+    from dewloosh.math.linalg.sparse import CSR
 
     #####################
     # Example 1

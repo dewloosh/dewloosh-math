@@ -72,8 +72,8 @@ def tr_3333_np(array: np.ndarray, dcm: np.ndarray,
 
 
 if __name__ == '__main__':
-    from polydata.math.linalg.frame import ReferenceFrame
-    from polydata.math.linalg.tensor import Tensor, Tensor3333Sym
+    from dewloosh.math.linalg.frame import ReferenceFrame
+    from dewloosh.math.linalg.tensor import Tensor, Tensor3333Sym
     import time
 
     A = ReferenceFrame()
