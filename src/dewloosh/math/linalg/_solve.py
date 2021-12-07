@@ -3,7 +3,7 @@ import numpy as np
 from numpy.linalg import LinAlgError
 from numba import njit, config, guvectorize
 config.THREADING_LAYER = 'omp'
-__cache = False
+__cache = True
 
 
 __all__ = ['solve', 'reduce', 'backsub', 'npsolve', 'inv3x3']
