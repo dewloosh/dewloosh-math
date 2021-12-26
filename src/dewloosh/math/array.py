@@ -18,6 +18,11 @@ def itype_of_ftype(dtype):
         return np.int64
     else:
         raise TypeError
+    
+
+def i32array(*args, **kwargs) -> np.ndarray:
+    """NumPy array contructor with built in argument `dtype=np.int32`."""
+    return np.array(*args, dtype=np.int32, **kwargs)
 
 
 @njit(nogil=True, cache=__cache)

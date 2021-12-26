@@ -407,7 +407,7 @@ class Array(ABC_Safe, np.ndarray):
         kwargs['dtype'] = v.dtype
         return super().__new__(cls, *args, **kwargs)
 
-    def arrays(self, iterable: Iterable = None, address: list = None,
+    def arrays(self, iterable: Iterable=None, address: list=None,
                cls=None):
         """
         Returns the innermost arrays.

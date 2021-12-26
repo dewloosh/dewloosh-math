@@ -1,75 +1,63 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from dewloosh.math.linalg.frame import ReferenceFrame
+from dewloosh.math.linalg import ReferenceFrame as Frame
+from dewloosh.core.typing.array import ArrayBase, Array
 
 
-class Vector(object):
+__all__ = ['Vector']
 
-    def __init__(self, array=None, frame=None, *args, **kwargs):
-        super().__init__()
-        try:
-            if not isinstance(array, np.ndarray):
-                array = np.array(array)
-        except Exception:
-            array = None
-        self._array = array
-        self.frame = frame
 
+class VectorBase(ArrayBase):
+    
+    def __new__(subtype, shape=None, dtype=float, buffer=None, 
+                offset=0, strides=None, order=None, frame=None):
+        obj = super().__new__(subtype, shape, dtype, buffer, 
+                              offset, strides, order)
+        obj.frame = frame
+        return obj
+    
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.frame = getattr(obj, 'frame', None)
+    
+    
+class Vector(Array):
+    
+    _array_cls_ = VectorBase
+
+    def __init__(self, *args, frame=None, **kwargs):
+        cls_params=kwargs.get('cls_params', dict())
+        if frame is not None:
+            cls_params['frame'] = frame
+        kwargs['cls_params'] = cls_params
+        super().__init__(*args, **kwargs)
+    
     @property
-    def array(self):
+    def array(self) -> VectorBase:
         return self._array
+    
+    @array.setter
+    def array(self, value):
+        buf = np.array(value)
+        self._array = self._array_cls_(shape=buf.shape, buffer=buf,
+                                       dtype=buf.dtype)
 
-    @property
-    def dim(self):
-        return len(self._array.shape)
-
-    @property
-    def shape(self):
-        return self._array.shape
-
-    @property
-    def size(self):
-        return self._array.size
-
-    def _transform(self, dcm: np.ndarray = None):
-        return dcm.T @ self._array
-
-    def orient(self, frame: ReferenceFrame = None):
-        if self.frame is not None:
-            dcm = self.frame.dcm(target=frame)
-        else:
-            if frame is not None:
-                dcm = frame.dcm()
-            else:
-                dcm = np.eye(self.dim)
-        self._array = self._transform(dcm)
-        self.frame = frame
+    def view(self, frame: Frame=None, *args, **kwargs):
+        return self.frame.dcm(target=frame) @ self.array
+    
+    def orient(self, *args, **kwargs):
+        dcm = Frame.ambient().orient_new(*args, **kwargs).dcm()
+        self.array = dcm.T @ self._array
         return self
-
-    def orient_new(self, *args, **kwargs):
-        dcm = ReferenceFrame.rotation_matrix(*args, **kwargs)
-        cls = type(self)
-        return cls(array=self._transform(dcm.T), frame=self.frame)
-
-    def transform_to_frame(self, frame: ReferenceFrame = None):
-        return self.orient(frame)
-
-    def rotate(self, *args, **kwargs):
-        return self.orient_new(*args, **kwargs)
-
-    def in_frame(self, frame: ReferenceFrame = None):
-        """
-        Returns components of current vector in the specified frame.
-        """
-        if self.frame is not None:
-            dcm = self.frame.dcm(target=frame)
+    
+    def orient_new(self, *args, keep_frame=True, **kwargs):
+        dcm = Frame.ambient().orient_new(*args, **kwargs).dcm()
+        if keep_frame:
+            array = dcm.T @ self._array
+            return Vector(array, frame=self.frame)
         else:
-            dcm = frame.dcm()
-        return self._transform(dcm.T)
-
-    def dot(self, other):
-        return np.dot(self._array, other._array)
-
+            raise NotImplementedError
+        
     def __repr__(self):
         return np.ndarray.__repr__(self._array)
 
@@ -79,11 +67,9 @@ class Vector(object):
 
 if __name__ == '__main__':
 
-    A = ReferenceFrame()
+    A = Frame()
     B = A.orient_new('Body', [0, 0, 30*np.pi/180],  'XYZ')
     C = B.orient_new('Body', [0, 0, 30*np.pi/180],  'XYZ')
 
     vA = Vector([1.0, 1.0, 0.0], frame=A)
-    vA.transform_to_frame(B)
-    vB = vA.rotate('Body', [0, 0, -30*np.pi/180],  'XYZ')
-    vB.in_frame(A)
+    vB = vA.orient_new('Body', [0, 0, -30*np.pi/180],  'XYZ')

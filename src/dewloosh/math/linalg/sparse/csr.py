@@ -164,6 +164,10 @@ if __name__ == '__main__':
     @njit
     def csr_row(csr: csr_matrix, i: int):
         return csr.row(i)
+    
+    @njit
+    def csr_data(csr: csr_matrix):
+        return csr.data
 
     @njit
     def csr_m(dtype=np.float64):
@@ -175,7 +179,8 @@ if __name__ == '__main__':
 
     csr = csr_matrix(mat)
     sdata, scols = csr_row(csr, 0)
-
+    print(sdata, scols)
+    
     e = csr_matrix.eye(3)
 
-    csrm = csr_m(np.int64)
+    print(csr_data(csr))
