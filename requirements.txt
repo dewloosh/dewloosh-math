@@ -1,7 +1,5 @@
 dewloosh.core
 scipy
 awkward
-#matplotlib
-numba
 networkx
 sympy
