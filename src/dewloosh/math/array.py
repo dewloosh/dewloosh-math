@@ -27,10 +27,16 @@ def i32array(*args, **kwargs) -> np.ndarray:
 
 @njit(nogil=True, cache=__cache)
 def minmax(a: nparray):
+    """
+    Returns the minimum and maximum values of an array.
+    """
     return a.min(), a.max()
 
 
 def ascont(array, *args, dtype=None, **kwargs):
+    """
+    Return a contiguous array (ndim >= 1) in memory (C order)
+    """
     if dtype is None:
         dtype = array.dtype
     return np.ascontiguousarray(array, dtype=dtype)
