@@ -131,3 +131,4 @@ dmypy.json
 
 # VSCode workspace file
 .code-workspace
+_README.md
