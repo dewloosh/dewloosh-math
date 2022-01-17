@@ -5,30 +5,72 @@ from dewloosh.core.typing.array import Array
     
 
 class ReferenceFrame(Array):
+    """
+    A base reference-frame for orthogonal vector spaces. 
+    It facilitates tramsformation of tensor-like quantities across 
+    different coordinate frames.
+    
+    The class is basically an interface on the `ReferenceFrame` class 
+    in `sympy.physics.vector`, with a similarly working `orient_new` function.
+    
+    Examples
+    --------
+    Define a standard Cartesian frame and rotate it around axis 'Z'
+    with an amount of 180 degrees:
+    
+    >>> A = ReferenceFrame(dim=3)
+    >>> B = A.orient_new('Body', [0, 0, np.pi], 'XYZ')
+    
+    To create a third frame that rotates from B the way B rotates from A, we
+    can do
+    
+    >>> A = ReferenceFrame(dim=3)
+    >>> C = A.orient_new('Body', [0, 0, 2*np.pi], 'XYZ')
+    
+    or we can define it relative to B (this literally makes C to looke 
+    in B like B looks in A)
+    
+    >>> C = ReferenceFrame(B.axes, parent=B)
+    
+    Notes
+    -----
+    The `dewloosh.geom.CartesianFrame` class takes the idea of the reference 
+    frame a step further by introducing the idea of the 'origo'. 
+    
+    """
     
     def __init__(self, axes=None, parent=None, *args, 
-                 order='row', name=None, origo=None, **kwargs):
+                 order='row', name=None, dim=None, **kwargs):
         order = 'C' if order in ['row', 'C'] else 'F'
+        try:
+            axes = axes if axes is not None else np.eye(dim)
+        except Exception as e:
+            if not isinstance(dim, int):
+                raise TypeError('If `axes` is `None`, `dim` must be provided as `int`.')
+            else:
+                raise e
         super().__init__(axes, *args, order=order, **kwargs)
         self.name = name
         self.parent = parent
-        self.origo = origo
         self._order = 0 if order == 'C' else 1
+        
     
     @classmethod
-    def ambient(cls, *args, dim=3, **kwargs):
-        return ReferenceFrame(np.eye(dim), *args, **kwargs)
+    def eye(cls, *args, dim=3, **kwargs):
+        if len(args)>0 and isinstance(args[0], int):
+            dim = args[0]
+        return cls(np.eye(dim), *args, **kwargs)
         
     def root(self):
         if self.parent is None:
             return self
         else:
             return self.parent.root()
-        
+                
     @property
     def order(self):
         return 'row' if self._order == 0 else 'col'
-
+    
     @property
     def axes(self):
         """
@@ -37,6 +79,23 @@ class ReferenceFrame(Array):
         space if there is none.
         """
         return self._array
+    
+    @axes.setter
+    def axes(self, value):
+        if isinstance(value, np.ndarray):
+            if value.shape == self._array.shape:
+                self._array = value
+            else:
+                raise RuntimeError("Mismatch in data dimensinons!")
+        else:
+            raise TypeError("Only numpy arras are supported here!")
+    
+    def show(self, target: 'ReferenceFrame'=None):
+        """
+        Returns the components of the current frame in a target frame.
+        If the target is None, the componants are returned in the ambient frame.
+        """
+        return self.dcm(target=target)
     
     def dcm(self, *args, target: 'ReferenceFrame'=None,
             source: 'ReferenceFrame'=None, **kwargs):
@@ -102,7 +161,7 @@ class ReferenceFrame(Array):
 
     def orient_new(self, *args, name='', **kwargs) -> 'ReferenceFrame':
         """
-        Returns a new frame, oriented relative to the ccalled object. 
+        Returns a new frame, oriented relative to the called object. 
         The orientation can be provided by all ways supported in 
         `sympy.orientnew`.
         
@@ -150,7 +209,7 @@ class ReferenceFrame(Array):
         source = Frame('source')
         target = source.orientnew('target', *args, **kwargs)
         dcm = np.array(target.dcm(source).evalf()).astype(float)
-        return ReferenceFrame(axes=dcm, parent=self, name=name)
+        return self.__class__(axes=dcm, parent=self, name=name)
 
 
 if __name__ == '__main__':

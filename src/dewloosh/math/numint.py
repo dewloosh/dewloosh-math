@@ -2,7 +2,8 @@
 import numpy as np
 
 
-__all__ = ['GaussPoints', 'GaussPoints1D', 'GaussPoints2D', 'GaussPoints3D']
+__all__ = ['GaussPoints', 'GaussPoints1D', 
+           'GaussPoints2D', 'GaussPoints3D']
 
 
 def GaussPoints(*args):

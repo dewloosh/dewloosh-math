@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from numpy.linalg import LinAlgError
-from numba import njit, config, guvectorize
-config.THREADING_LAYER = 'omp'
+from numba import njit, guvectorize
 __cache = True
 
 
@@ -10,17 +9,13 @@ __all__ = ['solve', 'reduce', 'backsub', 'npsolve', 'inv3x3']
 
 
 def solve(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray = None,
-          presc_val: np.ndarray = None, method='numpy',
-          inplace=False):
+          presc_val: np.ndarray = None, method='numpy', inplace=False):
     if method == 'numpy':
-        assert presc_bool is None, "Method does not support prescribed values."
+        assert presc_bool is None, \
+            "Method '{}' does not support prescribed values.".format(method)
         return npsolve(A, B)
-    fnc = None
-    if method == 'Gauss-Jordan':
-        fnc = _GaussJordan
-    elif method == 'Jordan':
-        fnc = _Jordan
-    if fnc is not None:
+    elif method in ['Jordan', 'Gauss-Jordan']:
+        fnc = _Jordan if method == 'Jordan' else _GaussJordan
         try:
             nEQ = len(B)
             if len(B.shape) == 1:
@@ -191,30 +186,35 @@ if __name__ == '__main__':
 
     def test_1(A, b, n=100):
         times = []
+        
         # measuring solution 1
         ts = time()
         for i in range(n):
             solve(A, b, method='Jordan')
         te = time()
         times.append((te-ts)*1000)
+        
         # measuring solution 2
         ts = time()
         for i in range(n):
             np.linalg.solve(A, b)
         te = time()
         times.append((te-ts)*1000)
+        
         # measuring solution 3
         ts = time()
         for i in range(n):
             solve(A, b, method='numpy')
         te = time()
         times.append((te-ts)*1000)
+        
         # measuring solution 4
         ts = time()
         for i in range(n):
             solve(A, b, method='Gauss-Jordan')
         te = time()
         times.append((te-ts)*1000)
+        
         return times
 
     A = np.array([[3, 1, 2], [1, 1, 1], [2, 1, 2]], dtype=np.float32)

@@ -62,8 +62,9 @@ class JaggedArray(ak.Array):
             return ak.flatten(self)
 
     def __array_function__(self, func, types, args, kwargs):
-        if func == np.unique:
-            return unique2d(*args, **kwargs)
+        # NOTE Moved to TopologyArray
+        # if func == np.unique:
+        #    return unique2d(*args, **kwargs)
         return super().__array_function__(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):

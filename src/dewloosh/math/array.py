@@ -141,10 +141,6 @@ def is1dintarray(a: np.ndarray):
     return isintarray(a) and len(a.shape) == 1
 
 
-def isposdef(a: np.ndarray):
-    return np.all(np.linalg.eigvals(a) > 0)
-
-
 def issymmetric(a: np.ndarray, tol=1e-8):
     return np.linalg.norm(a-a.T) < tol
 
@@ -163,11 +159,32 @@ def choice(choices, size, probs=None):
     Example
     -------
     >>> N, p = 10, 0.2
-    >>> randomarray([False, True], (N, N), [p, 1-p])
+    >>> choice([False, True], (N, N), [p, 1-p])
     """
     if probs is None:
         probs = np.full((len(choices),), 1/len(choices))
     return np.random.choice(a=choices, size=size, p=probs)
+
+
+def isposdef(a: np.ndarray, tol=1e-12):
+    return np.all(np.linalg.eigvals(a) > tol)
+
+
+def ispossemidef(a: np.ndarray):
+    return np.all(np.linalg.eigvals(a) >= 0)
+
+
+def random_pos_semidef(*shape):
+    """
+    Returns a random positive semi-definite array
+    of a specified shape.
+
+    Example
+    -------
+    >>> random_posdef_semidef(3, 3)
+    """
+    A = np.random.rand(*shape)
+    return A @ A.T
 
 
 @njit(nogil=True, parallel=True, cache=__cache)

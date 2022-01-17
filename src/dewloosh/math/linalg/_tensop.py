@@ -67,7 +67,7 @@ exec(_code)
 def tr_3333_np(array: np.ndarray, dcm: np.ndarray,
                optimize='greedy') -> np.ndarray:
     Q = dcm.T
-    return np.einsum('pi,qj,rk,sl,ijkl', Q, Q, Q, Q, array,
+    return np.einsum('pi, qj, rk, sl, ijkl', Q, Q, Q, Q, array,
                      optimize=optimize)
 
 
@@ -97,24 +97,28 @@ if __name__ == '__main__':
         tr_3333(array, dcm)
     te = time.time()
     times.append((te-ts)*1000)
+    
     # measuring solution 2
     ts = time.time()
     for i in range(100):
         tr_3333_jit(array, dcm)
     te = time.time()
     times.append((te-ts)*1000)
+    
     # measuring solution 3
     ts = time.time()
     for i in range(100):
         tr_3333_jit_compiled(array, dcm)
     te = time.time()
     times.append((te-ts)*1000)
+    
     # measuring solution 4
     ts = time.time()
     for i in range(100):
         tr_3333_np(array, dcm)
     te = time.time()
     times.append((te-ts)*1000)
+    
     # measuring solution 5
     ts = time.time()
     for i in range(100):

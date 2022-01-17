@@ -207,6 +207,11 @@ def normalize(A):
     return A/np.linalg.norm(A)
 
 
+@njit(nogil=True, cache=__cache)
+def norm(A):
+    return np.linalg.norm(A)
+
+
 @njit(nogil=True, parallel=True, cache=__cache)
 def _to_range(vals: ndarray, source: ndarray, target: ndarray):
     res = np.zeros_like(vals)
@@ -229,6 +234,28 @@ def to_range(vals: ndarray, *args, source: ndarray, target: ndarray=None,
         return np.squeeze(_to_range(vals, source, target))
     else:
         return _to_range(vals, source, target)
+    
+    
+@njit(nogil=True, parallel=True, cache=__cache)
+def _linspace(p0: ndarray, p1: ndarray, N):
+    s = p1 - p0
+    L = np.linalg.norm(s)
+    n = s / L
+    djac = L/(N-1)
+    step = n * djac
+    res = np.zeros((N, p0.shape[0]))
+    res[0] = p0
+    for i in prange(1, N-1):
+        res[i] = p0 + i*step
+    res[-1] = p1
+    return res
+
+
+def linspace(start, stop, N):
+    if isinstance(start, ndarray):
+        return _linspace(start, stop, N)
+    else:
+        return np.linspace(start, stop, N)
 
 
 if __name__ == '__main__':
