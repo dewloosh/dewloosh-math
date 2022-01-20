@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from dewloosh.math.linalg import ReferenceFrame
 from dewloosh.math.linalg import ReferenceFrame as Frame
 from dewloosh.core.typing.array import ArrayBase, Array
+from numba import njit
+__cache = True
 
 
 __all__ = ['Vector']
+
+
+@njit(nogil=True, cache=__cache)
+def show_vector(dcm: np.ndarray, arr: np.ndarray):
+    return dcm @ arr
 
 
 class VectorBase(ArrayBase):
@@ -36,7 +42,7 @@ class VectorBase(ArrayBase):
 class Vector(Array):
     
     _array_cls_ = VectorBase
-    _frame_cls_ = ReferenceFrame
+    _frame_cls_ = Frame
 
     def __init__(self, *args, frame=None, **kwargs):
         cls_params=kwargs.get('cls_params', dict())
@@ -62,12 +68,12 @@ class Vector(Array):
         return self.frame.dcm(target=target) @ self.array
     
     def orient(self, *args, **kwargs):
-        dcm = Frame.ambient(dim=len(self)).orient_new(*args, **kwargs).dcm()
+        dcm = Frame.eye(dim=len(self)).orient_new(*args, **kwargs).dcm()
         self.array = dcm.T @ self._array
         return self
     
     def orient_new(self, *args, keep_frame=True, **kwargs):
-        dcm = Frame.ambient(dim=len(self)).orient_new(*args, **kwargs).dcm()
+        dcm = Frame.eye(dim=len(self)).orient_new(*args, **kwargs).dcm()
         if keep_frame:
             array = dcm.T @ self._array
             return Vector(array, frame=self.frame)
@@ -84,8 +90,8 @@ class Vector(Array):
 if __name__ == '__main__':
 
     A = Frame()
-    B = A.orient_new('Body', [0, 0, 30*np.pi/180],  'XYZ')
-    C = B.orient_new('Body', [0, 0, 30*np.pi/180],  'XYZ')
+    B = A.orient_new('Body', [0, 0, 30*np.pi/180], 'XYZ')
+    C = B.orient_new('Body', [0, 0, 30*np.pi/180], 'XYZ')
 
     vA = Vector([1.0, 1.0, 0.0], frame=A)
-    vB = vA.orient_new('Body', [0, 0, -30*np.pi/180],  'XYZ')
+    vB = vA.orient_new('Body', [0, 0, -30*np.pi/180], 'XYZ')

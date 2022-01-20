@@ -170,6 +170,7 @@ class ReferenceFrame(Array):
 
         name : str
             Name for the new reference frame.
+        
         rot_type : str
             The method used to generate the direction cosine matrix. Supported
             methods are:
@@ -202,6 +203,7 @@ class ReferenceFrame(Array):
             
         Returns:
         ========      
+        
         ReferenceFrame
             A new ReferenceFrame object.
                    
