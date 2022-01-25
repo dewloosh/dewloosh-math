@@ -36,6 +36,8 @@ def frsolve(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray = None,
 
 
 if __name__ == '__main__':
+    pass
+    """
     from polydata.mechanics.fem import Uniform3D
     from polydata.mechanics.material.hooke import Hooke
     from dewloosh.math.linalg import solve
@@ -218,3 +220,4 @@ if __name__ == '__main__':
     print(solutions['frontal']['time'])
     print(solutions['numpy']['time'])
     print(solutions['Gauss-Jordan']['time'])
+    """

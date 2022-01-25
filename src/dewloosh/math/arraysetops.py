@@ -4,7 +4,7 @@ from dewloosh.math.array import count_cols
 import numpy as np
 from numpy import ndarray
 from awkward import Array as akarray
-from numba import njit, prange
+from numba import njit
 from numba.core import types
 from numba.typed import Dict
 from typing import Union

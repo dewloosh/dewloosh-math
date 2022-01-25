@@ -23,7 +23,8 @@ class GeneticAlgorithm:
         nPop : number of members in the population
         elitism : float or integer
     """
-    def __init__(self, fnc, ranges, length=5, p_c = 1, p_m = 0.2, nPop = 100,
+
+    def __init__(self, fnc, ranges, length=5, p_c=1, p_m=0.2, nPop=100,
                  *args, **kwargs):
         super().__init__()
         self.fnc = fnc
@@ -33,7 +34,7 @@ class GeneticAlgorithm:
         self.p_c = p_c
         self.p_m = p_m
 
-        # Later half of the population is used as a pool to make parents.
+        # Second half of the population is used as a pool to make parents.
         # This assumes that population size is a multiple of 4.
         if odd(nPop):
             nPop += 1
@@ -61,8 +62,8 @@ class GeneticAlgorithm:
         self._evolver = self.evolver()
         self._evolver.send(None)
 
-    def set_solution_params(self, tol = 1e-12, maxiter = 200, miniter = 100,
-                            elitism = 1, **kwargs):
+    def set_solution_params(self, tol=1e-12, maxiter=200, miniter=100,
+                            elitism=1, **kwargs):
         self.tol = tol
         self.maxiter = np.max([miniter, maxiter])
         self.miniter = np.min([miniter, maxiter])
@@ -76,7 +77,7 @@ class GeneticAlgorithm:
                 self.select(self._genotypes, self.phenotypes))
             yield self._genotypes
 
-    def evolve(self, cycles = 1):
+    def evolve(self, cycles=1):
         for _ in range(cycles):
             next(self._evolver)
         return self.genotypes
@@ -88,7 +89,7 @@ class GeneticAlgorithm:
             yield abs(value - _value) < self.tol
             value = _value
 
-    def solve(self, reset = False, returnlast = False, **kwargs):
+    def solve(self, reset=False, returnlast=False, **kwargs):
         if reset:
             self.reset()
         self.set_solution_params(**kwargs)
@@ -104,15 +105,15 @@ class GeneticAlgorithm:
             next(criteria)
             nIter += 1
         self.nIter = nIter
-        return self.best_phenotype(lastknown = returnlast)
+        return self.best_phenotype(lastknown=returnlast)
 
-    def fittness(self, phenotypes = None, dtype = np.float32):
+    def fittness(self, phenotypes=None, dtype=np.float32):
         if phenotypes is not None:
             self._fittness = np.array([self.fnc(x) for x in phenotypes],
-                                      dtype = dtype)
+                                      dtype=dtype)
         return self._fittness.astype(dtype)
 
-    def best_phenotype(self, lastknown = False):
+    def best_phenotype(self, lastknown=False):
         if lastknown:
             fittness = self._fittness
         else:
@@ -120,7 +121,7 @@ class GeneticAlgorithm:
         best = np.argmin(fittness)
         return self.phenotypes[best]
 
-    def divide(self, fittness = None):
+    def divide(self, fittness=None):
         """
         Divides population to elit and others,
         and returns the corresponding index arrays.
@@ -138,7 +139,7 @@ class GeneticAlgorithm:
             others = list(range(self.nPop))
         return list(elit), others
 
-    def random_parents_generator(self, genotypes = None):
+    def random_parents_generator(self, genotypes=None):
         """
         Returns random pairs from a list of genotypes.
         This assumes theat the length of the input array is
@@ -151,40 +152,40 @@ class GeneticAlgorithm:
         while nPool > 2:
             where = np.argwhere(pool == True).flatten()
             nPool = len(where)
-            pair = np.random.choice(where, 2, replace = False)
+            pair = np.random.choice(where, 2, replace=False)
             parent1 = genotypes[pair[0]]
             parent2 = genotypes[pair[1]]
             pool[pair] = False
             yield parent1, parent2
 
     @abstractmethod
-    def populate(self, genotypes = None):
+    def populate(self, genotypes=None):
         ...
 
     @abstractmethod
-    def decode(self, genotypes = None):
+    def decode(self, genotypes=None):
         ...
 
     @abstractmethod
-    def crossover(self, parent1 = None, parent2 = None):
+    def crossover(self, parent1=None, parent2=None):
         ...
 
     @abstractmethod
-    def mutate(self, child = None):
+    def mutate(self, child=None):
         ...
 
     @abstractmethod
-    def select(self, genotypes = None, phenotypes = None):
+    def select(self, genotypes=None, phenotypes=None):
         ...
 
 
 class BinaryGeneticAlgorithm(GeneticAlgorithm):
 
-    def populate(self, genotypes = None):
+    def populate(self, genotypes=None):
         nPop = self.nPop
         if genotypes is None:
             poolshape = (int(nPop / 2), self.dim * self.length)
-            genotypes = np.random.randint(2, size = poolshape)
+            genotypes = np.random.randint(2, size=poolshape)
         else:
             poolshape = genotypes.shape
         nParent = poolshape[0]
@@ -200,20 +201,20 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
                 raise RuntimeError
         return genotypes
 
-    def decode(self, genotypes = None):
+    def decode(self, genotypes=None):
         span = (2**self.length - 2**0)
         genotypes = genotypes.reshape((self.nPop, self.dim, self.length))
         precisions = [(self.ranges[d, -1] - self.ranges[d, 0]) / span
                       for d in range(self.dim)]
         phenotypes = \
-            np.sum([genotypes[:,:,i]*2**i
-                    for i in range(self.length)], axis = 0).astype(np.float32)
+            np.sum([genotypes[:, :, i]*2**i
+                    for i in range(self.length)], axis=0).astype(np.float32)
         for d in range(self.dim):
             phenotypes[:, d] *= precisions[d]
             phenotypes[:, d] += self.ranges[d, 0]
         return phenotypes
 
-    def crossover(self, parent1 = None, parent2 = None, nCut = None):
+    def crossover(self, parent1=None, parent2=None, nCut=None):
         if np.random.rand() > self.p_c:
             return parent1, parent2
 
@@ -226,8 +227,8 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         cuts.extend(p)
         cuts = np.sort(cuts)
 
-        child1 = np.zeros(self.dim*self.length,dtype = np.int32)
-        child2 = np.zeros(self.dim*self.length,dtype = np.int32)
+        child1 = np.zeros(self.dim*self.length, dtype=np.int32)
+        child2 = np.zeros(self.dim*self.length, dtype=np.int32)
 
         randBool = np.random.rand() > 0.5
         for i in range(nCut+1):
@@ -240,18 +241,18 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
 
         return self.mutate(child1), self.mutate(child2)
 
-    def mutate(self, child = None):
+    def mutate(self, child=None):
         p = np.random.rand(self.dim*self.length)
-        return np.where(p > self.p_m,child,1-child)
+        return np.where(p > self.p_m, child, 1-child)
 
-    def select(self, genotypes = None, phenotypes = None):
+    def select(self, genotypes=None, phenotypes=None):
         fittness = self.fittness(phenotypes)
         winners, others = self.divide(fittness)
-        while len(winners) < int(self.nPop/2):
+        while len(winners) < int(self.nPop / 2):
             candidates = np.random.choice(others, 3, replace=False)
             winner = np.argsort([fittness[ID] for ID in candidates])[0]
             winners.append(candidates[winner])
-        return np.array([genotypes[w] for w in winners], dtype = np.float32)
+        return np.array([genotypes[w] for w in winners], dtype=np.float32)
 
 
 if __name__ == '__main__':
@@ -266,19 +267,21 @@ if __name__ == '__main__':
     ranges = [
         [-10, 10],
         [-10, 10]
-        ]
-    BGA = BinaryGeneticAlgorithm(f, ranges, length = 12, nPop = 200)
+    ]
+    BGA = BinaryGeneticAlgorithm(f, ranges, length=12, nPop=200)
     r = BGA.solve()
     print(r)
-
-    """
+    
+    # plot the history
     import matplotlib.pyplot as plt
-    history = [f(GA.best_phenotype())]
+    BGA = BinaryGeneticAlgorithm(f, ranges, length=12, nPop=200)
+    history = [f(BGA.best_phenotype())]
     for _ in range(100):
-        GA.evolve(1)
-        history.append(f(GA.best_phenotype()))
+        BGA.evolve(1)
+        history.append(f(BGA.best_phenotype()))
     plt.plot(history)
-    x = GA.best_phenotype()
+    plt.show()
+    x = BGA.best_phenotype()
     fx = f(x)
     print('min {} @ {}'.format(fx,x))
-    """
+    

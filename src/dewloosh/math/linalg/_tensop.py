@@ -73,7 +73,7 @@ def tr_3333_np(array: np.ndarray, dcm: np.ndarray,
 
 if __name__ == '__main__':
     from dewloosh.math.linalg.frame import ReferenceFrame
-    from dewloosh.math.linalg.tensor import Tensor, Tensor3333Sym
+    from dewloosh.math.linalg.tensor import Tensor, Tensor3333
     import time
 
     A = ReferenceFrame()
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     tA = Tensor([[1, 0, 0], [0, 0, 0], [0, 0, 0]], frame=A)
     tA.transform_to_frame(B)
 
-    C = Tensor3333Sym(np.zeros((3, 3, 3, 3)), frame=A)
+    C = Tensor3333(np.zeros((3, 3, 3, 3)), frame=A)
     dcm = B.dcm()
     array = C._array
     Q = np.transpose(dcm)

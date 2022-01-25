@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from sympy.physics.vector import ReferenceFrame as Frame
-from dewloosh.core.typing.array import Array
+from sympy.physics.vector import ReferenceFrame as SymPyFrame
+from dewloosh.core.abc.array import Array
     
 
 class ReferenceFrame(Array):
@@ -101,17 +101,15 @@ class ReferenceFrame(Array):
             source: 'ReferenceFrame'=None, **kwargs):
         """
         Returns the direction cosine matrix (DCM) of a transformation
-        between this frame and another. The other frame can be the target,
-        or the source as well, depending on the arguments.
+        between a source (S) and a target (T) frame. The current frame can be the 
+        source or the target, depending on the arguments. 
         
-        If the function is called without arguments, it returns the DCM
-        matrix of the current object relative to ambient space.
+        If called without arguments, it returns the DCM matrix from the 
+        root frame to the current frame (S=root, T=self).
+                
+        If `source` is not `None`, then T=self.
         
-        If `source` is not `None`, the function returns the DCM of the
-        current frame, relative to the source frame.
-        
-        If `target` is not `None`, the function returns the DCM of the
-        target frame, relative to the current frame.
+        If `target` is not `None`, then S=self.
                 
         Parameters
         ----------
@@ -132,7 +130,7 @@ class ReferenceFrame(Array):
         Returns:
         --------        
         numpy.ndarray
-            DCM matrix.
+            DCM matrix from S to T.
                     
         """
         if source is not None:
@@ -153,7 +151,7 @@ class ReferenceFrame(Array):
         See `Referenceframe.orient_new` for the possible arguments.
                     
         """
-        source = Frame('source')
+        source = SymPyFrame('source')
         target = source.orientnew('target', *args, **kwargs)
         dcm = np.array(target.dcm(source).evalf()).astype(float)
         self._array = dcm @ self.axes
@@ -208,7 +206,7 @@ class ReferenceFrame(Array):
             A new ReferenceFrame object.
                    
         """
-        source = Frame('source')
+        source = SymPyFrame('source')
         target = source.orientnew('target', *args, **kwargs)
         dcm = np.array(target.dcm(source).evalf()).astype(float)
         return self.__class__(axes=dcm, parent=self, name=name)

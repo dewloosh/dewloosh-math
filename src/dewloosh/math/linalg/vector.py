@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from dewloosh.math.linalg import ReferenceFrame as Frame
-from dewloosh.core.typing.array import ArrayBase, Array
-from numba import njit
+from dewloosh.core.abc.array import ArrayBase, Array
+from numba import njit, prange
+from dewloosh.math.linalg import ReferenceFrame
 __cache = True
 
 
@@ -12,6 +13,14 @@ __all__ = ['Vector']
 @njit(nogil=True, cache=__cache)
 def show_vector(dcm: np.ndarray, arr: np.ndarray):
     return dcm @ arr
+
+
+@njit(nogil=True, parallel=True, cache=__cache)
+def show_vectors(dcm: np.ndarray, coords: np.ndarray):
+    res = np.zeros_like(coords)
+    for i in prange(coords.shape[0]):
+        res[i] = dcm @ coords[i, :]
+    return res
 
 
 class VectorBase(ArrayBase):
@@ -64,8 +73,12 @@ class Vector(Array):
                                        dtype=buf.dtype)
 
     def show(self, target: Frame=None, *args, **kwargs):
-        target = Frame(dim=len(self)) if target is None else target
-        return self.frame.dcm(target=target) @ self.array
+        target = target if target is not None else \
+            ReferenceFrame(dim=self._array.shape[-1])
+        if len(self.array.shape) == 1:
+            return show_vector(self.frame.dcm(target=target), self.array)
+        else:
+            return show_vectors(self.frame.dcm(target=target), self.array)
     
     def orient(self, *args, **kwargs):
         dcm = Frame.eye(dim=len(self)).orient_new(*args, **kwargs).dcm()

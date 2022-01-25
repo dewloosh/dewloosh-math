@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from numba import jit
 from dewloosh.math.linalg.frontal.frutils import max_frontwidth_bulk, \
@@ -121,6 +122,8 @@ def frontal_sym_bulk_uniform(A: np.ndarray, topology: np.ndarray,
 
 
 if __name__ == '__main__':
+    pass
+    """
     from polydata.mechanics.fem import Uniform3D
     from polydata.mechanics.material.hooke import Hooke
     from dewloosh.math.linalg.frontal.path import optimal_elimination_path
@@ -280,3 +283,4 @@ if __name__ == '__main__':
     print(solutions['frontal']['max'])
     print(solutions['numpy']['max'])
     print(solutions['Gauss-Jordan']['max'])
+    """

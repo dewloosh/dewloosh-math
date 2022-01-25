@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from numba import jit
 from dewloosh.math.linalg.sparse import CSR
-from dewloosh.math.topology.graph import pseudo_peripheral_nodes
+from dewloosh.math.graph import pseudo_peripheral_nodes
 
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)
@@ -184,6 +185,8 @@ def reverse_mapping(iarray: np.ndarray):
 
 
 if __name__ == '__main__':
+    pass
+    """
     from polydata.mechanics.fem import Uniform3D
     from dewloosh.math.linalg.frontal.frutils import max_frontwidth_bulk
     from dewloosh.math.linalg.frontal.topo import signed_topo_bulk
@@ -237,3 +240,4 @@ if __name__ == '__main__':
                               [-4, -5, -6, -7, -8, -9, -10, -11, -12]])
     path_1 = np.arange(3, dtype=np.int32)
     maxwidth_topo_1 = max_frontwidth_bulk(topo_signed_1, path_1)
+    """

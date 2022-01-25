@@ -118,11 +118,11 @@ def flatten2d(a: np.ndarray, order: str = 'C'):
 
 
 def isfloatarray(a: np.ndarray):
-    return np.issubdtype(a.dtype, np.float)
+    return np.issubdtype(a.dtype, float)
 
 
 def isintegerarray(a: np.ndarray):
-    return np.issubdtype(a.dtype, np.integer)
+    return np.issubdtype(a.dtype, int)
 
 
 def isintarray(a: np.ndarray):
@@ -130,7 +130,7 @@ def isintarray(a: np.ndarray):
 
 
 def isboolarray(a: np.ndarray):
-    return np.issubdtype(a.dtype, np.bool)
+    return np.issubdtype(a.dtype, bool)
 
 
 def is1dfloatarray(a: np.ndarray):
