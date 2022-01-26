@@ -320,6 +320,7 @@ if __name__ == '__main__':
     eq12 = Equality(x2 + x3 - x4 - 2, variables=syms)
     P1 = LLP(cost=obj1, constraints=[eq11, eq12], variables=syms)
     x_1 = P1.solve(order=[0, 2, 3, 1])
+    print(x_1)
 
     """
     Example for degenerate solution.
@@ -332,7 +333,8 @@ if __name__ == '__main__':
     eq22 = Equality(x2 + x3 - x4 - 2, variables=syms)
     P2 = LLP(cost=obj2, constraints=[eq21, eq22], variables=syms)
     x_2 = P2.solve()
-
+    print(x_2)
+    
     """
     Example for no solution.
     """
@@ -343,7 +345,8 @@ if __name__ == '__main__':
     eq32 = Equality(x2 + x3 - x4 - 2, variables=syms)
     P3 = LLP(cost=obj3, constraints=[eq31, eq32], variables=syms)
     x_3 = P3.solve()
-
+    print(x_3)
+    
     """
     Example for multiple solutions.
     (0, 1, 1, 0), (0, 4, 0, 2)
@@ -355,3 +358,4 @@ if __name__ == '__main__':
     eq42 = Equality(x2 + x3 - x4 - 2, variables=syms)
     P4 = LLP(cost=obj4, constraints=[eq41, eq42], variables=syms)
     x_4 = P4.solve()
+    print(x_4)

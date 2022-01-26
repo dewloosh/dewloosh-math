@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from collections import namedtuple
 
 
-__all__ = ['GaussPoints', 'GaussPoints1D', 
+__all__ = ['Quadrature', 'GaussPoints', 'GaussPoints1D', 
            'GaussPoints2D', 'GaussPoints3D']
+
+
+Quadrature = namedtuple('QuadratureRule', ['inds', 'pos', 'weight'])
 
 
 def GaussPoints(*args):
