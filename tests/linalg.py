@@ -15,7 +15,7 @@ settings.register_profile(
 )
 
 
-class TestEncoding(unittest.TestCase):
+class TestLinalg(unittest.TestCase):
         
     @given(st.integers(min_value=2, max_value=10))
     def test_random_semipos(self, N):
