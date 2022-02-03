@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from dewloosh.math.linalg import ReferenceFrame as Frame
-from dewloosh.core.abc.array import ArrayBase, Array
+from dewloosh.math.linalg.array import ArrayBase, Array
 from numba import njit, prange
-from dewloosh.math.linalg import ReferenceFrame
 __cache = True
 
 
@@ -74,7 +73,7 @@ class Vector(Array):
 
     def show(self, target: Frame=None, *args, **kwargs):
         target = target if target is not None else \
-            ReferenceFrame(dim=self._array.shape[-1])
+            Frame(dim=self._array.shape[-1])
         if len(self.array.shape) == 1:
             return show_vector(self.frame.dcm(target=target), self.array)
         else:
@@ -102,7 +101,7 @@ class Vector(Array):
 
 if __name__ == '__main__':
 
-    A = Frame()
+    A = Frame(dim=3)
     B = A.orient_new('Body', [0, 0, 30*np.pi/180], 'XYZ')
     C = B.orient_new('Body', [0, 0, 30*np.pi/180], 'XYZ')
 

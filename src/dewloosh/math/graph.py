@@ -94,6 +94,7 @@ def pseudo_peripheral_nodes(adj : CSR):
 
 
 if __name__ == '__main__':
+    pass
     """
     from pyoneer.mechanics.fem import Uniform3D
 

@@ -1,5 +1,6 @@
 dewloosh.core
+numba
+numpy
 scipy
 awkward
-networkx
 sympy
