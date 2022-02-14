@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from sympy.physics.vector import ReferenceFrame as SymPyFrame
-from dewloosh.math.linalg.array import Array
+
+from ..array import Array
     
 
 class ReferenceFrame(Array):

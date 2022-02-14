@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from dewloosh.math.linalg.frame import ReferenceFrame as Frame
-from dewloosh.math.linalg.vector import Vector, VectorBase
+
 from dewloosh.core.tools import latinrange
+
+from .frame import ReferenceFrame as Frame
+from .vector import Vector, VectorBase
 
 
 class Tensor(Vector):

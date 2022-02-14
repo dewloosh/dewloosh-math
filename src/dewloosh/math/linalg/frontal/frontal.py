@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from dewloosh.math.linalg.frontal.proc import frontal_sym_bulk_uniform
-from dewloosh.math.linalg.frontal.postproc import backsub_fr
-from dewloosh.math.linalg.frontal.path import order_to_path
 from numpy.linalg import LinAlgError
+
+from .proc import frontal_sym_bulk_uniform
+from .postproc import backsub_fr
+from .path import order_to_path
 
 
 def frsolve(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray = None,

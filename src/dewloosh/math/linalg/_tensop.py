@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from numba import njit, config, prange
-config.THREADING_LAYER = 'omp'
 
 
 def tr_3333(array: np.ndarray, dcm: np.ndarray):

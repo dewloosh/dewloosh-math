@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.linalg.sparse.utils import count_cols
-from dewloosh.math.arraysetops import unique2d
 import numpy as np
 from numpy import concatenate as join
 import awkward as ak
 from awkward import unflatten as build
 import numpy as np
+
+from .utils import count_cols
+from ...arraysetops import unique2d
 
 
 def shape(arr): return arr.shape[:2]

@@ -1,4 +1,3 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.function.function import *
-from dewloosh.math.function.relation import *
-from dewloosh.math.function.functions import *
+from .function import *
+from .relation import *

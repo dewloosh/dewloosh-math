@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.function.function import Function
 from enum import Enum
-from dewloosh.core.tools import getasany
 import operator as op
 from typing import TypeVar, Callable
+
+from dewloosh.core.tools import getasany
+
+from .function import Function
+
 
 __all__ = ['Equality', 'InEquality']
 

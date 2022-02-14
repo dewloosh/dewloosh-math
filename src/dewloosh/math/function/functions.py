@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sympy as sy
-from dewloosh.math.function.testfunction import TestMinFunction
-from dewloosh.math.function.meta import symbolize, substitute
+from .testfunction import TestMinFunction
+from .meta import symbolize, substitute
 
 
 def Rosenbrock(a=1, b=100):

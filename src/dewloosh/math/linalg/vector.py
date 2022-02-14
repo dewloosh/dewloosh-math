@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from dewloosh.math.linalg import ReferenceFrame as Frame
-from dewloosh.math.linalg.array import ArrayBase, Array
 from numba import njit, prange
+
+from .frame import ReferenceFrame as Frame
+from .array import ArrayBase, Array
+
 __cache = True
 
 

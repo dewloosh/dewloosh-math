@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from numba import jit
-from dewloosh.math.linalg.sparse import CSR
-from dewloosh.math.graph import pseudo_peripheral_nodes
+
+from ..sparse import CSR
+from ..sparse.graph import pseudo_peripheral_nodes
 
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)

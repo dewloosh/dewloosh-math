@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-import sympy as sy
-from dewloosh.math.function import Function, InEquality, \
-    Equality, VariableManager
-from dewloosh.core.tools import getasany
-from collections import defaultdict, Iterable
-from dewloosh.math.function.relation import Relations, Relation
-from dewloosh.math.function.meta import coefficients
-from sympy.utilities.iterables import multiset_permutations
 from numpy.linalg import LinAlgError
+import sympy as sy
+from sympy.utilities.iterables import multiset_permutations
 from copy import copy
+from collections import defaultdict, Iterable
+
+from dewloosh.core.tools import getasany
+
+from ..function import Function, InEquality, Equality, VariableManager
+from ..function.relation import Relations, Relation
+from ..function.meta import coefficients
+
 
 
 class LLP(object):

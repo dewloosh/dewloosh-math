@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.function.function import Function
 import collections
+
+from .function import Function
+
 
 
 class TestFunction(Function):

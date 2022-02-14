@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.array import random_pos_semidef, ispossemidef
-from dewloosh.math.linalg import ReferenceFrame as Frame
-from dewloosh.math.linalg.vector import Vector
 from hypothesis import given, settings, strategies as st, HealthCheck
 import unittest
 import numpy as np
 
+from dewloosh.math.array import random_pos_semidef, ispossemidef
+from dewloosh.math.linalg import ReferenceFrame, Vector
+
 
 settings.register_profile(
     "linalg_test",
-    max_examples=200,
-    deadline=1000,  # Allow 1000ms per example
+    max_examples=100,
+    deadline=None,  
     suppress_health_check=(HealthCheck.too_slow, HealthCheck.data_too_large),
 )
 
@@ -33,7 +33,7 @@ class TestLinalg(unittest.TestCase):
         and tests the transformation of components.
         """
         # the original frame    
-        A = Frame(dim=3)
+        A = ReferenceFrame(dim=3)
         
         # the original vector
         vA = Vector([1., 0., 0.], frame=A)
@@ -55,7 +55,7 @@ class TestLinalg(unittest.TestCase):
         Tests the equivalence of a series of relative transformations
         against an absolute transformation.
         """
-        A = Frame(dim=3)
+        A = ReferenceFrame(dim=3)
         vA = Vector([1.0, 0., 0.0], frame=A)
         B = A.orient_new('Body', [0., 0., 0], 'XYZ')
         N = 3

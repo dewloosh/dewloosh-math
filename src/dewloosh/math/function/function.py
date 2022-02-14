@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.function.meta import MetaFunction, substitute
 from typing import TypeVar, Callable
-from dewloosh.core.tools import getasany
 import sympy as sy
 from sympy import Expr, degree, symbols, latex, lambdify
 from sympy.core.numbers import One
 import numpy as np
 from collections import OrderedDict
+
+from dewloosh.core.tools import getasany
+
+from .meta import MetaFunction, substitute
+
 
 __all__ = ['Function', 'VariableManager', 'FuncionLike']
 

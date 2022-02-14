@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.array import flatten2dC
-from dewloosh.math.array import count_cols
 import numpy as np
 from numpy import ndarray
 from awkward import Array as akarray
@@ -9,6 +7,10 @@ from numba.core import types
 from numba.typed import Dict
 from typing import Union
 import awkward as ak
+
+from .array import flatten2dC
+from .array import count_cols
+
 __cache = True
 
 

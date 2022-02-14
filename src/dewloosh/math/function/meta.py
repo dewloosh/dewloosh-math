@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from dewloosh.core.abc import ABCMeta_Weak
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import lambdify, derive_by_array, symbols, Expr
 from sympy.core.numbers import One
 from collections import OrderedDict
+
+from dewloosh.core.abc import ABCMeta_Weak
 
 
 class ABCMeta_MetaFunction(ABCMeta_Weak):

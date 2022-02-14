@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from numba import jit
-from dewloosh.math.linalg.sparse import CSR
+
+from ..sparse.csr import CSR
 
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)

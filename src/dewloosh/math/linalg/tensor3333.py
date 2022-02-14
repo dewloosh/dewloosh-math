@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.linalg.tensor import Tensor
-from dewloosh.math.linalg._tensop import tr_3333
-from dewloosh.math.linalg._tensop import tr_3333_jit
 import sympy as sy
 import numpy as np
+
+from .tensor import Tensor
+from ._tensop import tr_3333, tr_3333_jit
 
 
 class Tensor3333(Tensor):

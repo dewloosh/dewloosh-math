@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from dewloosh.math.function.function import Function
 from enum import Enum
+
+from .function import Function
+
 
 
 class ConstraintType(Enum):
