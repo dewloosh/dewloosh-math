@@ -117,7 +117,7 @@ class Tensor3333(Tensor):
                 res[s, r, q, p] = sym
         if as_matrix:
             mat = np.zeros((6, 6), dtype=object)
-            imap = cls.imap(imap)
+            imap = cls.imap(imap) if imap is None else imap
             for ij, ijkl in imap.items():
                 mat[ij] = res[ijkl]
             if 'sympy' in args:

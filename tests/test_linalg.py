@@ -3,8 +3,9 @@ from hypothesis import given, settings, strategies as st, HealthCheck
 import unittest
 import numpy as np
 
-from dewloosh.math.array import random_pos_semidef, ispossemidef
-from dewloosh.math.linalg import ReferenceFrame, Vector
+from dewloosh.math.array import random_pos_semidef_matrix, random_posdef_matrix, \
+    ispossemidef, isposdef
+from dewloosh.math.linalg import ReferenceFrame, Vector, inv3x3, det3x3, inv3x3u
 
 
 settings.register_profile(
@@ -15,14 +16,21 @@ settings.register_profile(
 )
 
 
-class TestLinalg(unittest.TestCase):
+class TestTransform(unittest.TestCase):
         
     @given(st.integers(min_value=2, max_value=10))
-    def test_random_semipos(self, N):
+    def test_random_pos_semidef(self, N):
         """
-        Tests the creation of random, positive semi-dfinite matrices.
+        Tests the creation of random, positive semidefinite matrices.
         """
-        assert ispossemidef(random_pos_semidef(N, N))
+        assert ispossemidef(random_pos_semidef_matrix(N))
+        
+    @given(st.integers(min_value=2, max_value=10))
+    def test_random_posdef(self, N):
+        """
+        Tests the creation of random, positive definite matrices.
+        """
+        assert isposdef(random_posdef_matrix(N))
             
     @given(st.integers(min_value=0, max_value=2), 
            st.floats(min_value=0., max_value=360.))
@@ -67,8 +75,32 @@ class TestLinalg(unittest.TestCase):
             theta += dtheta
             vB_tot = vA.orient_new('Body', [0., 0., theta], 'XYZ')
             assert np.all(np.isclose(vB_rel.show(), vB_tot.show()))
+            
+            
+class Test3x3(unittest.TestCase):
+        
+    @given(st.integers(min_value=1, max_value=10))
+    def test_linsolve_3x3(self, shift):
+        A = random_posdef_matrix(3) + shift
+        b = np.random.rand(3) + shift
+        x = np.linalg.solve(A, b)
+        x1 = inv3x3(A) @ b
+        x2 = inv3x3u(A) @ b
+        diff1 = np.abs(x - x1)
+        diff2 = np.abs(x - x2)
+        err1 = np.dot(diff1, diff1)
+        err2 = np.dot(diff2, diff2)
+        assert err1 < 1e-12 and err2 < 1e-12
+        
+    @given(st.integers(min_value=1, max_value=10))
+    def test_det_3x3(self, shift):
+        A = random_posdef_matrix(3) + shift
+        det = np.linalg.det(A)
+        det1 = det3x3(A)
+        diff1 = np.abs(det - det1)
+        assert diff1 < 1e-12
 
     
 if __name__ == "__main__":
-    
+        
     unittest.main()

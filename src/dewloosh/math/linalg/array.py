@@ -5,6 +5,7 @@ from numpy.lib.mixins import NDArrayOperatorsMixin
 from dewloosh.core.abc.wrap import Wrapper
 from dewloosh.core.abc import ABC_Safe
 
+from ..array import ascont
 
 __all__ = ['ArrayBase', 'Array']
 
@@ -53,9 +54,9 @@ class Array(NDArrayOperatorsMixin, Wrapper):
 
     _array_cls_ = ArrayBase
 
-    def __init__(self, *args, cls_params=None, **kwargs):
+    def __init__(self, *args, cls_params=None, contiguous=True, **kwargs):
         if len(args) > 0 and isinstance(args[0], np.ndarray):
-            buf = args[0]
+            buf = ascont(args[0]) if contiguous else args[0] 
         else:
             buf = np.array(*args, **kwargs)
         cls_params = dict() if cls_params is None else cls_params
