@@ -77,7 +77,7 @@ class Vector(Array):
         target = target if target is not None else \
             Frame(dim=self._array.shape[-1])
         if len(self.array.shape) == 1:
-            return show_vector(self.frame.dcm(target=target), self.array)
+            return show_vector(self.frame.dcm(target=target), self.array)  # dcm @ arr
         else:
             return show_vectors(self.frame.dcm(target=target), self.array)
     

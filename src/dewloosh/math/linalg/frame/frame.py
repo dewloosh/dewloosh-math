@@ -55,7 +55,6 @@ class ReferenceFrame(Array):
         self.parent = parent
         self._order = 0 if order == 'C' else 1
         
-    
     @classmethod
     def eye(cls, *args, dim=3, **kwargs):
         if len(args)>0 and isinstance(args[0], int):
@@ -118,7 +117,7 @@ class ReferenceFrame(Array):
             A tuple of arguments to pass to the `orientnew` 
             function in `sympy`. 
             
-        args : dict, Optional
+        kwargs : dict, Optional
             A dictionary of keyword arguments to pass to the 
             `orientnew` function in `sympy`. 
         
@@ -139,8 +138,7 @@ class ReferenceFrame(Array):
         elif target is not None:
             return target.dcm() @ self.dcm().T        
         # We only get here if the function is called without arguments.
-        # The dcm of the current frame relative to the ambient frame 
-        # is returned.
+        # The dcm from the ambient frame to the current frame is returned.
         if self.parent is None:
             return self.axes
         else:
