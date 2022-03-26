@@ -1,4 +1,4 @@
-dewloosh.core==1.0.1
+dewloosh.core==1.0.2
 numba
 numpy
 scipy
