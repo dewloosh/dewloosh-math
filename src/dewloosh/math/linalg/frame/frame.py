@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from numpy import ndarray
 from sympy.physics.vector import ReferenceFrame as SymPyFrame
 
 from ..array import Array
@@ -40,8 +41,8 @@ class ReferenceFrame(Array):
     
     """
     
-    def __init__(self, axes=None, parent=None, *args, 
-                 order='row', name=None, dim=None, **kwargs):
+    def __init__(self, axes:ndarray=None, parent=None, *args, 
+                 order:str='row', name:str=None, dim:int=None, **kwargs):
         order = 'C' if order in ['row', 'C'] else 'F'
         try:
             axes = axes if axes is not None else np.eye(dim)
@@ -49,15 +50,15 @@ class ReferenceFrame(Array):
             if not isinstance(dim, int):
                 raise TypeError('If `axes` is `None`, `dim` must be provided as `int`.')
             else:
-                raise e
+                raise e        
         super().__init__(axes, *args, order=order, **kwargs)
         self.name = name
         self.parent = parent
         self._order = 0 if order == 'C' else 1
-        
+                
     @classmethod
     def eye(cls, *args, dim=3, **kwargs):
-        if len(args)>0 and isinstance(args[0], int):
+        if len(args) > 0 and isinstance(args[0], int):
             dim = args[0]
         return cls(np.eye(dim), *args, **kwargs)
         
@@ -101,7 +102,7 @@ class ReferenceFrame(Array):
             source: 'ReferenceFrame'=None, **kwargs):
         """
         Returns the direction cosine matrix (DCM) of a transformation
-        between a source (S) and a target (T) frame. The current frame can be the 
+        from a source (S) to a target (T) frame. The current frame can be the 
         source or the target, depending on the arguments. 
         
         If called without arguments, it returns the DCM matrix from the 
