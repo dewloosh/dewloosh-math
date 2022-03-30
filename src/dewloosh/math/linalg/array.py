@@ -11,8 +11,8 @@ __all__ = ['ArrayBase', 'Array']
 
 
 class ArrayBase(ABC_Safe, np.ndarray):
-    
-    def __new__(subtype, shape=None, dtype=float, buffer=None, 
+
+    def __new__(subtype, shape=None, dtype=float, buffer=None,
                 offset=0, strides=None, order=None, frame=None,
                 inds=None):
         # Create the ndarray instance of our type, given the usual
@@ -23,7 +23,7 @@ class ArrayBase(ABC_Safe, np.ndarray):
                               buffer, offset, strides, order)
         # Finally, we must return the newly created object:
         return obj
-    
+
     def __array_finalize__(self, obj):
         # ``self`` is a new object resulting from
         # ndarray.__new__(InfoArray, ...), therefore it only has
@@ -36,7 +36,8 @@ class ArrayBase(ABC_Safe, np.ndarray):
         #    (we're in the middle of the InfoArray.__new__
         #    constructor, and self.info will be set when we return 0to
         #    InfoArray.__new__)
-        if obj is None: return
+        if obj is None:
+            return
         # From view casting - e.g arr.view(InfoArray):
         #    obj is arr
         #    (type(obj) can be InfoArray)
@@ -48,26 +49,26 @@ class ArrayBase(ABC_Safe, np.ndarray):
         # method sees all creation of default objects - with the
         # InfoArray.__new__ constructor, but also with
         # arr.view(InfoArray).
-       
-    
+
+
 class Array(NDArrayOperatorsMixin, Wrapper):
 
     _array_cls_ = ArrayBase
 
     def __init__(self, *args, cls_params=None, contiguous=True, **kwargs):
         if len(args) > 0 and isinstance(args[0], np.ndarray):
-            buf = ascont(args[0]) if contiguous else args[0] 
+            buf = ascont(args[0]) if contiguous else args[0]
         else:
             buf = np.array(*args, **kwargs)
         cls_params = dict() if cls_params is None else cls_params
         self._array = self._array_cls_(shape=buf.shape, buffer=buf,
                                        dtype=buf.dtype, **cls_params)
         super(Array, self).__init__(wrap=self._array)
-    
+
     @property
     def dim(self):
         return len(self._array.shape)
-    
+
     def __repr__(self):
         return f"{self.__class__.__name__}\n({self._array})"
 
@@ -78,13 +79,12 @@ class Array(NDArrayOperatorsMixin, Wrapper):
 
     def __getitem__(self, key):
         return self._array.__getitem__(key)
-    
+
     def __setitem__(self, key):
         return self._array.__setitem__(key)
-    
+
     def __len__(self):
         return self._array.shape[0]
 
     def to_numpy(self):
         return self.__array__()
-
