@@ -148,6 +148,14 @@ def normalize(A):
     return A/np.linalg.norm(A)
 
 
+@njit(nogil=True, parallel=True, cache=__cache)
+def normalize2d(A):
+    res = np.zeros_like(A)
+    for i in prange(A.shape[0]):
+        res[i] = normalize(A[i])
+    return res
+
+
 @njit(nogil=True, cache=__cache)
 def norm(A):
     return np.linalg.norm(A)
