@@ -108,3 +108,4 @@ if __name__ == '__main__':
 
     vA = Vector([1.0, 1.0, 0.0], frame=A)
     vB = vA.orient_new('Body', [0, 0, -30*np.pi/180], 'XYZ')
+    vC = Vector(vA.show(C), frame=C)

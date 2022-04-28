@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-from dewloosh.core.tools import latinrange
+from dewloosh.core.tools.tools import latinrange
 
 from .frame import ReferenceFrame as Frame
 from .vector import Vector, VectorBase

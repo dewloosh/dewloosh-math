@@ -2,6 +2,32 @@
 import codecs
 import os.path
 from setuptools import find_namespace_packages, setup
+from setuptools.command.install import install
+
+
+_AxisVM_version_ = None
+
+class InstallCommand(install):
+    user_options = install.user_options + [
+        ('version=', None, 'AxisVM version')
+    ]
+
+    def initialize_options(self):
+        install.initialize_options(self)
+        self.version = None
+
+    def finalize_options(self):
+        #print('The custom option for install is ', self.custom_option)
+        install.finalize_options(self)
+
+    def run(self):
+        global _AxisVM_version_
+        _AxisVM_version_ = self.version
+        #install.run(self)  # OR: install.do_egg_install(self)
+		if not self._called_from_setup(inspect.currentframe()):
+			orig.install.run(self)
+		else:
+			self.do_egg_install()
 
 
 def read(rel_path):
@@ -65,5 +91,8 @@ setup(
     package_dir={'':'src'},     
     install_requires=required,
 	zip_safe=False,
+	cmdclass={
+        'install': InstallCommand,
+    },
 )
 
