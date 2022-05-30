@@ -162,6 +162,14 @@ def norm(A):
 
 
 @njit(nogil=True, parallel=True, cache=__cache)
+def norm2d(A):
+    res = np.zeros(A.shape[0])
+    for i in prange(A.shape[0]):
+        res[i] = norm(A[i, :])
+    return res
+
+
+@njit(nogil=True, parallel=True, cache=__cache)
 def _to_range(vals: ndarray, source: ndarray, target: ndarray):
     res = np.zeros_like(vals)
     s0, s1 = source
