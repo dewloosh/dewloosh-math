@@ -13,7 +13,6 @@ from ..function.relation import Relations, Relation
 from ..function.meta import coefficients
 
 
-
 class LLP(object):
     def __init__(self, *args, constraints=None, variables=None,
                  positive=True, **kwargs):

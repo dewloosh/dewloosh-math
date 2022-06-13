@@ -2,7 +2,6 @@
 import codecs
 import os.path
 from setuptools import find_namespace_packages, setup
-from setuptools.command.install import install
 
 
 def read(rel_path):
@@ -37,7 +36,7 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 
-_module = os.listdir(os.path.join(os.path.dirname(__file__), "src\\dewloosh"))[0]
+_module = os.listdir(os.path.join(os.path.dirname(__file__), "src/dewloosh"))[0]
 _init_path = "src/dewloosh/{}/__init__.py".format(_module)
 _version = get_version(_init_path)
 _description = get_description(_init_path)
