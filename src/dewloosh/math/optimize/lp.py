@@ -1,29 +1,210 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from numpy import ndarray
 from numpy.linalg import LinAlgError
 import sympy as sy
 from sympy.utilities.iterables import multiset_permutations
-from copy import copy
+from copy import copy, deepcopy
 from collections import defaultdict, Iterable
+from typing import Tuple
+from enum import Enum, auto, unique
+from time import time
 
 from dewloosh.core.tools import getasany
 
 from ..function import Function, InEquality, Equality, VariableManager
 from ..function.relation import Relations, Relation
 from ..function.meta import coefficients
+from .errors import DegenerateProblemError, NoSolutionError
+from ..array import atleast2d
 
 
-class LLP(object):
+__all__ = ['LinearProgrammingProblem']
+
+
+@unique
+class LinearProgrammingResult(Enum):
+    UNIQUE = auto()
+    MULTIPLE = auto()
+    NOSOLUTION = auto()
+    DEGENERATE = auto()
+    
+
+class LinearProgrammingProblem:
+    """
+    Class to handle general linear programming problems. It gaps the 
+    bridge between the general form and the standard form. The class accepts
+    symbolic expressions, but this should not be expected to be too fast. 
+    For problems starting from medium size, it is suggested to use the 
+    `solve_standard_form` method of the class.
+
+    Parameters
+    ----------
+    constraints : Iterable[Function]
+        List of constraint functions.
+
+    variables : Iterable
+        List of variables of the system.
+
+    positive : bool, Optional
+        A `True` value indicated that all variables are expected to take
+        only positive values. Default is `True`.
+
+    'obj', 'cost', 'payoff', 'fittness', 'f' : Function
+        The objective function.
+
+    Examples
+    --------
+    The examples requires `sympy` to be installed.
+
+    (1) Example for unique solution.
+
+    .. math::
+        :nowrap:
+
+        \\begin{eqnarray}
+            & minimize&  \quad  3 x_1 + x_2 + 9 x_3 + x_4  \\\\
+            & subject \, to& & \\\\
+            & & x_1 + 2 x_3 + x_4 \,=\, 4, \\\\
+            & & x_2 + x_3 - x_4 \,=\, 2, \\\\
+            & & x_i \,\geq\, \, 0, \qquad i=1, \ldots, 4.
+        \\end{eqnarray}
+
+    >>> from dewloosh.math.optimize import LinearProgrammingProblem as LPP
+    >>> import sympy as sy
+    >>> variables = ['x1', 'x2', 'x3', 'x4']
+    >>> x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
+    >>> obj1 = Function(3*x1 + 9*x3 + x2 + x4, variables=syms)
+    >>> eq11 = Equality(x1 + 2*x3 + x4 - 4, variables=syms)
+    >>> eq12 = Equality(x2 + x3 - x4 - 2, variables=syms)
+    >>> problem = LPP(cost=obj1, constraints=[eq11, eq12], variables=syms)
+    >>> problem.solve()
+    array([0., 6., 0., 4.])
+
+    (2) Example for degenerate solution.
+
+    >>> variables = ['x1', 'x2', 'x3', 'x4']
+    >>> x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
+    >>> obj2 = Function(3*x1 + x2 + 9*x3 + x4, variables=syms)
+    >>> eq21 = Equality(x1 + 2*x3 + x4, variables=syms)
+    >>> eq22 = Equality(x2 + x3 - x4 - 2, variables=syms)
+    >>> P2 = LPP(cost=obj2, constraints=[eq21, eq22], variables=syms)
+    >>> try:
+    >>>     P2.solve()
+    >>> except DegenerateProblemError:
+    >>>     pass
+
+    (3) Example for no solution.
+
+    >>> variables = ['x1', 'x2', 'x3', 'x4']
+    >>> x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
+    >>> obj3 = Function(-3*x1 + x2 + 9*x3 + x4, variables=syms)
+    >>> eq31 = Equality(x1 - 2*x3 - x4 + 2, variables=syms)
+    >>> eq32 = Equality(x2 + x3 - x4 - 2, variables=syms)
+    >>> P3 = LPP(cost=obj3, constraints=[eq31, eq32], variables=syms)
+    >>> try:
+    >>>     P3.solve()
+    >>> except NoSolutionError:
+    >>>     pass
+
+    (4) Example for multiple solutions. We can ask for all the results
+        with the option `return_all=True`.
+
+    >>> variables = ['x1', 'x2', 'x3', 'x4']
+    >>> x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
+    >>> obj4 = Function(3*x1 + 2*x2 + 8*x3 + x4, variables=syms)
+    >>> eq41 = Equality(x1 - 2*x3 - x4 + 2, variables=syms)
+    >>> eq42 = Equality(x2 + x3 - x4 - 2, variables=syms)
+    >>> P4 = LPP(cost=obj4, constraints=[eq41, eq42], variables=syms)
+    >>> P4.solve(return_all=True)
+    array([[0., 4., 0., 2.], [0., 1., 1., 0.]])
+
+    """
+    __tmpl_shift__ = 'y_{}'
+    __tmpl_slack__ = 'z_{}'
+
     def __init__(self, *args, constraints=None, variables=None,
-                 positive=True, **kwargs):
+                 positive=None, standardform=False, **kwargs):
         super().__init__()
-        self.standardform = False
-        self.obj = getasany(['obj', 'cost', 'payoff', 'fittness', 'f'],
-                            None, **kwargs)
-        self.constraints = [] if constraints is None else constraints
-        self.vmanager = VariableManager(variables, positive=positive)
+        self.obj = None
+        self.constraints = None
+        self.standardform = None
+        self.vmanager = None
+        self._hook = None
+        self._update(*args,
+                     constraints=constraints,
+                     variables=variables,
+                     positive=positive,
+                     standardform=standardform, **kwargs)
+
+    def _update(self, *args, variables=None, positive=None, **kwargs):
+        self.standardform = kwargs.get('standardform', self.standardform)
+        if len(args) > 0:
+            obj = None
+            if isinstance(args[0], Function):
+                obj = args[0]
+            if obj is not None:
+                self.obj = obj
+        if self.obj is None:
+            self.obj = getasany(['obj', 'cost', 'payoff', 'fittness', 'f'],
+                                None, **kwargs)
+        assert self.obj is not None, "Objective must be set on instance creation!"
+        self.constraints = kwargs.get('constraints', self.constraints)
+        if self.constraints is None:
+            self.constraints = []
+        if variables is not None:
+            if isinstance(positive, bool):
+                self.vmanager = VariableManager(variables, positive=positive)
+            else:
+                self.vmanager = VariableManager(variables)
+        self._hook = kwargs.get('_hook', self._hook)
+
+    @property
+    def vm(self):
+        return self.vmanager
+
+    @staticmethod
+    def example_unique() -> 'LinearProgrammingProblem':
+        """
+        Returns teh following LPP:
+
+        .. math::
+            :nowrap:
+
+            \\begin{eqnarray}
+                & minimize&  \quad  3 x_1 + x_2 + 9 x_3 + x_4  \\\\
+                & subject \, to& & \\\\
+                & & x_1 + 2 x_3 + x_4 \,=\, 4, \\\\
+                & & x_2 + x_3 - x_4 \,=\, 2, \\\\
+                & & x_i \,\geq\, \, 0, \qquad i=1, \ldots, 4.
+            \\end{eqnarray}
+
+        The LPP has a unique solution:
+
+        :math:`\quad \mathbf{x} = (0., 6., 0., 4.), \quad f(\mathbf{x}) = 10.`
+
+        Example
+        --------
+
+        >>> from dewloosh.math.optimize import LinearProgrammingProblem as LPP
+        >>> problem = LPP.example_unique()
+        >>> problem.solve()
+        array([0., 6., 0., 4.])
+
+        """
+        variables = ['x1', 'x2', 'x3', 'x4']
+        x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
+        obj1 = Function(3*x1 + 9*x3 + x2 + x4, variables=syms)
+        eq11 = Equality(x1 + 2*x3 + x4 - 4, variables=syms)
+        eq12 = Equality(x2 + x3 - x4 - 2, variables=syms)
+        P = LinearProgrammingProblem(cost=obj1, constraints=[eq11, eq12],
+                                     variables=syms, positive=True)
+        return P
 
     def add_constraint(self, *args, **kwargs):
+        """
+        Adds a new constraint to the system.
+        """
         if isinstance(args[0], Function):
             if isinstance(args[0], InEquality):
                 assert args[0].op in [Relations.ge, Relations.le], \
@@ -37,56 +218,137 @@ class LLP(object):
     def variables(self):
         return self.vmanager.target()
 
-    def sync_variables(self):
+    def _sync_variables(self):
         s = set()
         s.update(self.obj.variables)
         for c in self.constraints:
             s.update(c.variables)
         self.vmanager.add_variables(s)
 
-    def shift_variables(self):
+    def _shift_variables(self):
+        """
+        Handle variables not restricted in sign.
+        """
         vmap = dict()
+        tmpl = self.__class__.__tmpl_shift__
+        count = 1
         for v in self.vmanager.source():
             if not v.is_positive:
-                s = str(v)
-                expr = sum(sy.symbols([s + '__+', s + '__-'], positive=True))
-                vmap[v] = expr
+                sym = [tmpl.format(count), tmpl.format(count + 1)]
+                si, sj = sy.symbols(sym, positive=True)
+                vmap[v] = si - sj
         self.vmanager.substitute(vmap)
 
-    def get_system_variables(self):
+    def get_system_variables(self) -> list:
+        """
+        Returns all variables of the system.
+        """
         s = set()
         s.update(self.obj.variables)
         for c in self.constraints:
             s.update(c.variables)
         return list(s)
 
-    def get_slack_variables(self, template='y_{}'):
-        inequalities = list(filter(lambda c: isinstance(c, InEquality),
-                            self.constraints))
+    def get_slack_variables(self, template=None) -> list:
+        """
+        Returns the slack variables of the inequality constraints of the problem.
+        """
+        tmpl = self.__class__.__tmpl_slack__ if template is None else template
+        c = self.constraints
+        inequalities = list(filter(lambda c: isinstance(c, InEquality), c))
         n = len(inequalities)
-        strlist = [template.format(i) for i in range(n)]
+        strlist = list(map(tmpl.format, range(1, n + 1)))
         y = sy.symbols(strlist, positive=True)
         for i in range(n):
             inequalities[i].slack = y[i]
         return y
 
-    def has_standardform(self):
+    def has_standardform(self) -> bool:
+        """
+        Tells if the object admits the standard form of a linear program or not.
+
+        Notes
+        -----
+        An LPP admits standard form if
+            * only equality constraints are present
+            * all variables are positive
+
+        Returns
+        -------
+        bool
+            `True` if the problem admits the standard form.
+
+        """
         all_eq = all([isinstance(c, Equality) for c in self.constraints])
         all_pos = all([v.is_positive for v in self.get_system_variables()])
         return all_pos and all_eq
 
-    def as_standard(self, inplace=False):
+    def simplify(self, maximize=False, inplace=False) -> 'LinearProgrammingProblem':
+        """
+        Simplifies the problem so that it admits the standard form. 
+
+        This is done in 3 steps:
+
+            1) Decomposing variables not restricted in sign according to
+                    :math:`x = x^{+} - x^{-}, \quad \mid x \mid = x^{+} + x^{-}`,
+               where 
+                    :math:`x^{+} = max(0, x) \geq 0, \quad x^{-} = max(0, -x) \geq 0`.
+               Then the variable :math:`x` can be substituted by         
+                    :math:`x = x^{+} - x^{-}` and the conditions :math:`\quad x^{+}, x^{-} \geq 0`. 
+            2) Transforming inequalities into equalities using slack variables.
+                We introduce new variables
+                    :math:`\mathbf{y} = \mathbf{b} - \mathbf{A} \mathbf{x} \geq \mathbf{0}`,
+                and formulate the extended problem
+                    :math:`\hat{\mathbf{A}} \mathbf{X} = \mathbf{b}`,
+                where 
+                    :math:`\mathbf{X} = (\mathbf{x} \, \, \mathbf{y}), \quad \hat{\mathbf{A}} = (\mathbf{A} \, \, \mathbf{1})`.
+            3) Transform to minimization problem if necessary using the simple rule
+                :math:`max(f) = -min(-f)`.
+
+        Parameters
+        ----------
+
+        maximize : bool
+            Set this true if the problem is a maximization. Default is False.
+
+        inplace : Boolean
+            If `True`, transformation happend in place, changing the internal structure
+            ob the instance it is invoked by. In this case, `self` gets returned for
+            possible continuation.
+
+        Notes
+        -----
+        Steps 1) and 2) both increase the number of variables of the standard system.
+
+        Returns
+        -------
+        LinearProgrammingProblem
+            An LPP that admits a standard form.
+
+        dict, Optional.
+            A mapping between variables of the standard and the general form.
+            Only if `return_inverse` is `True`.
+
+        Raises
+        ------
+        NotImplementedError
+            On invalid input.
+
+        """
+        P = self if inplace else deepcopy(self)
         # handle variables
-        self.sync_variables()
-        self.shift_variables()
-        self.vmanager.add_variables(self.get_slack_variables())
-        v = self.vmanager.source()
+        P._sync_variables()
+        P._shift_variables()
+        s = P.get_slack_variables()
+        P.vmanager.add_variables(s)
+        v = P.vmanager.source()  # can be in arbitrary order
         n = len(v)
-        x = list(sy.symbols(' '.join(['x_{}'.format(i) for i in range(n)]),
+        x = list(sy.symbols(' '.join(['X_{}'.format(i) for i in range(1, n + 1)]),
                             positive=True))
-        c = list(sy.symbols(' '.join(['c_{}'.format(i) for i in range(n)])))
+        c = list(sy.symbols(
+            ' '.join(['c_{}'.format(i) for i in range(1, n + 1)])))
         x_v = {x_: v_ for x_, v_ in zip(x, v)}
-        self.vmanager.substitute(vmap=x_v, inverse=True)
+        P.vmanager.substitute(vmap=x_v, inverse=True)
         v.append(1)
         x.append(1)
         c.append(sy.symbols('c'))
@@ -94,41 +356,122 @@ class LLP(object):
         template = np.inner(c, x)
         x.pop(-1)
         v.pop(-1)
-        vmap = self.vmanager.vmap
+        vmap = P.vmanager.vmap  # == v_x, inverse of x_v
+        smap = {x_v[vmap[s]]: 1 for s in s}
 
-        def redefine(fnc):
+        def redefine_expr(fnc, aux: dict = None):
             expr = fnc.expr.subs([(v, expr) for v, expr in vmap.items()])
             fnc_coeffs = coefficients(expr=expr, normalize=True)
             coeffs = defaultdict(lambda: 0)
+            if isinstance(aux, dict):
+                coeffs.update(aux)
             coeffs.update({x_c[x]: c for x, c in fnc_coeffs.items()})
-            if isinstance(fnc, InEquality):
-                coeffs[x_c[fnc.slack]] = 1 if fnc.op == Relations.ge else -1
-            expr = template.subs([(c_, coeffs[c_]) for c_ in c])
-            if isinstance(fnc, Equality):
-                return Equality(expr, variables=x, vmap=x_v)
-            elif isinstance(fnc, InEquality):
-                eq = Equality(expr, variables=x, vmap=x_v)
-                eq.slack = fnc.slack
-                return eq
-            elif isinstance(fnc, Function):
-                return Function(expr, variables=x, vmap=x_v)
+            return template.subs([(c_, coeffs[c_]) for c_ in c])
+
+        def redefine_function(fnc):
+            minmax = -1 if maximize else 1
+            expr = minmax * redefine_expr(fnc)
+            return Function(expr, variables=x, vmap=x_v)
+
+        def redefine_equality(fnc):
+            expr = redefine_expr(fnc)
+            return Equality(expr, variables=x, vmap=x_v)
+
+        def redefine_inequality(fnc):
+            expr = redefine_expr(fnc, smap)
+            if fnc.op == Relations.ge:
+                pass
+            elif fnc.op == Relations.le:
+                expr *= -1
             else:
-                return None
+                raise NotImplementedError("Only >= and <= are allowed!")
+            expr -= vmap[fnc.slack]
+            eq = Equality(expr, variables=x, vmap=x_v)
+            eq.slack = fnc.slack
+            return eq
 
-        obj = redefine(self.obj)
-        constraints = [redefine(c) for c in self.constraints]
-        return LLP(obj=obj, constraints=constraints, variables=x)
+        obj = redefine_function(P.obj)
+        _c = P.constraints
+        constraints = []
+        eq = list(map(redefine_equality, filter(
+            lambda c: isinstance(c, Equality), _c)))
+        constraints += eq
+        if len(smap) > 0:
+            ieq = list(map(redefine_inequality, filter(
+                lambda c: isinstance(c, InEquality), _c)))
+            constraints += ieq
+        if inplace:
+            self._update(constraints=constraints,
+                         variables=x, positive=True, _hook=P)
+        else:
+            lpp = LinearProgrammingProblem(obj=obj, constraints=constraints,
+                                           variables=x, positive=True, _hook=P)
+            lpp.vmanager.inv = x_v
+            return lpp
 
-    def eval_constraints(self, x):
-        return np.array([c.f0(x) for c in self.constraints],
-                        dtype=np.float32)
+    def eval_constraints(self, x: Iterable) -> Iterable:
+        """
+        Evaluates the constraints at `x`.
+        """
+        return np.array([c.f0(x) for c in self.constraints], dtype=float)
 
-    def feasible(self, x=None) -> bool:
+    def feasible(self, x: Iterable = None) -> bool:
+        """
+        Returns `True` if `x` is a feasible candidate to the current problem,
+        `False` othwerise.
+        """
         c = [c.relate(x) for c in self.constraints]
-        return all(c) and all(x >= 0)
+        if self.has_standardform():
+            return all(c) and all(x >= 0)
+        else:
+            return all(c)
 
     @staticmethod
-    def basic_solution(A=None, b=None, order=None, **kwargs):
+    def basic_solution(A=None, b=None, order=None) -> Tuple[ndarray]:
+        """
+        Returns a basic solution to a problem the form
+
+        .. math::
+            :nowrap:
+
+            \\begin{eqnarray}
+                minimize  \quad  \mathbf{c}\mathbf{x} \quad under \quad 
+                \mathbf{A}\mathbf{x}=\mathbf{b}, \quad \mathbf{x} \, \geq \, 
+                \mathbf{0}.
+            \\end{eqnarray}
+
+        where :math:`\mathbf{b} \in \mathbf{R}^m, \mathbf{c} \in \mathbf{R}^n` and :math:`\mathbf{A}` is
+        an :math:`m \\times n` matrix with :math:`n>m`.
+
+        Parameters
+        ----------
+        A : ndarray
+            An :math:`m \times n` matrix with :math:`n>m`
+
+        b : ndarray
+            Right-hand sides. :math:`\mathbf{b} \in \mathbf{R}^m`
+
+        order : Iterable[int], Optional
+            An arbitrary permutation of the indices.
+
+        Returns
+        -------
+        ndarray : 
+            Coefficient matrix :math:`\mathbf{B}`
+
+        ndarray
+            Inverse of coefficient matrix :math:`\mathbf{B}^{-1}`
+
+        ndarray
+            Coefficient matrix :math:`\mathbf{N}`
+
+        ndarray
+            Basic solution :math:`\mathbf{x}_{B}`
+
+        ndarray
+            Remaining solution :math:`\mathbf{x}_{N}`
+
+        """
         m, n = A.shape
         r = n - m
         assert r > 0
@@ -170,34 +513,135 @@ class LLP(object):
         finally:
             if stop:
                 N_ = A_[:, m:]
-                xN = np.zeros(r, dtype=np.float32)
+                xN = np.zeros(r, dtype=float)
                 return B_, B_inv, N_, xB, xN, order
             else:
                 return None
 
     @staticmethod
-    def solve_standard_form(A, b, c, order=None, tol=1e-10):
+    def solve_standard_form(A: ndarray, b: ndarray, c: ndarray, order=None,
+                            tol: float = 1e-10):
+        """
+        Solves a linear problem in standard form:
+
+        :math:`minimize \quad \mathbf{c} \mathbf{x} \quad under \quad \mathbf{A}\mathbf{x} = \mathbf{b}`.
+
+        See the notes section for the behaviour and the possible gotchas.
+
+        Parameters
+        ----------
+        A : np.ndarray
+            2d float array.
+
+        b : np.ndarray
+            1d float array.
+
+        c : np.ndarray
+            1d float array.
+
+        order : Iterable, Optional
+            The order of the variables.
+
+        tol : float, Optional
+            Floating point tolerance. Default is 1e-10.
+
+        Returns
+        -------
+        ndarray
+            Results as a 1d (unique solution) or a 2d (multiple solutions) 
+            numpy array.
+
+        Notes
+        -----
+        1) The value of the parameter `tol` is used to make judgements on the vanishing ratios 
+        of entering variables, therfore effects the detection of degenerate situations. The higher
+        the value, the more tolerant the system is to violations.
+
+        2) The line between the unique, the degenerate situation and having no solution at all may 
+        be very thin in some settings. In such a scenario, repeated solutions might return a 
+        a solution, a `NoSolutionError` or a `DegenerateProblemError` as well. Problems
+        with this behaviour are all considered degenerate, and suggest an ill-posed setup.
+
+        Raises
+        ------
+        NoSolutionError
+            If there is no solution to the problem.
+
+        DegenerateProblemError
+            If the problem is degenerate.
+
+        """
         m, n = A.shape
         r = n - m
         assert r > 0
-        basic = LLP.basic_solution(A, b, order=order)
+        basic = LinearProgrammingProblem.basic_solution(A, b, order=order)
         if basic:
             B, B_inv, N, xB, xN, order = basic
             c_ = c[order]
             cB = c_[:m]
             cN = c_[m:]
+            t = None
         else:
-            return None
-
-        def current_result(message: str = None, fail=False):
-            if message:
-                print(message)
-            if not fail:
-                return np.concatenate((xB, xN))[np.argsort(order)]
-            return None
+            raise NoSolutionError("Failed to find basic solution!")
 
         def unit_basis_vector(length, index=0, value=1.0):
             return value * np.bincount([index], None, length)
+
+        def enter(i_enter):
+            nonlocal B, B_inv, N, xB, xN, order, cB, cN, t
+            b_enter = unit_basis_vector(r, i_enter, 1.0)
+
+            # w = vector of decrements of the current solution xB
+            # Only positive values are a threat to feasibility, and we
+            # need to tell which of the components of xB vanishes first,
+            # which, since all components of xB are posotive,
+            # has to do with the positive components only.
+            w_enter = np.matmul(W, b_enter)
+            i_leaving = np.argwhere(w_enter > 0)
+            if len(i_leaving) == 0:
+                # step size could be indefinitely increased in this
+                # direction without violating feasibility, there is
+                # no solution to the problem
+                raise NoSolutionError("There is not solution to this problem!")
+
+            vanishing_ratios = xB[i_leaving]/w_enter[i_leaving]
+            # the variable that vanishes first is the one with the smallest
+            # vanishing ratio
+            i_leave = i_leaving.flatten()[np.argmin(vanishing_ratios)]
+
+            # step size in the direction of current basis vector
+            t = xB[i_leave]/w_enter[i_leave]
+
+            # update solution
+            if abs(t) <= tol:
+                # Smallest vanishing ratio is zero, any step would
+                # result in an infeasible situation.
+                # -> go for the next entering variable
+                return False
+            xB -= t*w_enter
+            xN = t*b_enter
+
+            order[m + i_enter], order[i_leave] = \
+                order[i_leave], order[m + i_enter]
+            B[:, i_leave], N[:, i_enter] = \
+                N[:, i_enter], copy(B[:, i_leave])
+            B_inv = np.linalg.inv(B)
+            cB[i_leave], cN[i_enter] = cN[i_enter], cB[i_leave]
+            xB[i_leave], xN[i_enter] = xN[i_enter], xB[i_leave]
+            return True
+
+        def unique_result():
+            return np.concatenate((xB, xN))[np.argsort(order)]
+
+        def multiple_results():
+            assert np.all(reduced_costs >= 0)
+            assert reduced_costs.min() <= tol
+            inds = np.where(reduced_costs <= tol)[0]
+            res = [unique_result(), ]
+            for i in inds:
+                assert enter(i)
+                res.append(unique_result())
+            return np.stack(res)
 
         degenerate = False
         while True:
@@ -205,7 +649,7 @@ class LLP(object):
                 # The objective could be decreased, but only on the expense
                 # of violating positivity of the standard variables.
                 # Hence, the solution is degenerate.
-                return current_result('degenerate solution')
+                raise DegenerateProblemError('The problem is ill posed!')
 
             # calculate reduced costs
             W = np.matmul(B_inv, N)
@@ -217,9 +661,15 @@ class LLP(object):
                 # a unique optimizer.
                 d = np.count_nonzero(reduced_costs > 0)
                 if d < len(reduced_costs):
-                    return current_result('multiple solutions')
+                    # there are edges along with the objective does
+                    # not increase
+                    #dc = np.abs(reduced_costs - reduced_costs.min())
+                    #inds = np.where(dc <= tol)[0]
+                    # !MULTIPLE SOLUTIONS
+                    return multiple_results()
                 else:
-                    return current_result('unique solution')
+                    # !UNIQUE SOLUTION
+                    return unique_result()
             # If we reach this line, reduction of the objective is possible,
             # although maybe indefinitely. If the objective can be decreased,
             # but only on the expense of violating feasibility, the
@@ -230,133 +680,165 @@ class LLP(object):
             # components of the vector of reduced costs.
             i_entering = np.argsort(reduced_costs)[:nEntering]
             for i_enter in i_entering:
-                # basis vector for the current entering variable
-                b_enter = unit_basis_vector(r, i_enter, 1.0)
-
-                # w = vector of decrements of the current solution xB
-                # Only positive values are a threat to feasibility, and we
-                # need to tell which of the components of xB vanishes first,
-                # which, since all components of xB are posotive,
-                # has to do with the positive components only.
-                w_enter = np.matmul(W, b_enter)
-                i_leaving = np.argwhere(w_enter > 0)
-                if len(i_leaving) == 0:
-                    # step size could be indefinitely increased in this
-                    # direction without violating feasibility, there is
-                    # no solution to the problem
-                    return current_result('no solution', fail=True)
-                vanishing_ratios = xB[i_leaving]/w_enter[i_leaving]
-                # the variable that vanishes first is the one with the smallest
-                # vanishing ratio
-                i_leave = i_leaving.flatten()[np.argmin(vanishing_ratios)]
-
-                # step size in the direction of current basis vector
-                t = xB[i_leave]/w_enter[i_leave]
-
-                # update_solution
-                if abs(t) <= tol:
+                if not enter(i_enter):
                     # Smallest vanishing ratio is zero, any step would
                     # result in an infeasible situation.
                     # -> go for the next entering variable
                     continue
-                xB -= t*w_enter
-                xN = t*b_enter
-
-                # reorder
-                order[m + i_enter], order[i_leave] = \
-                    order[i_leave], order[m + i_enter]
-                B[:, i_leave], N[:, i_enter] = \
-                    N[:, i_enter], copy(B[:, i_leave])
-                B_inv = np.linalg.inv(B)
-                cB[i_leave], cN[i_enter] = cN[i_enter], cB[i_leave]
-                xB[i_leave], xN[i_enter] = xN[i_enter], xB[i_leave]
 
                 # break loop at the first meaningful (t != 0) decrease and
                 # force recalculation of the vector of reduced costs
                 degenerate = False
                 break
 
-    def solve(self, order=None, as_dict=False):
-        P = self.as_standard()
+    def to_numpy(self, maximize=False, return_coeffs=False):
+        """
+        Returns the complete numerical representation of the standard 
+        form of the problem:
 
-        # calculate A, b and c
+            :math:`minimize \quad \mathbf{c} \mathbf{x} \quad under \quad \mathbf{A}\mathbf{x} = \mathbf{b}`.
+
+        Parameters
+        ----------
+        maximize : bool
+            Set this true if the problem is a maximization. Default is False.
+
+        return_coeffs : bool
+            If `True`, linear coefficients of the design variables are returned as
+            a sequence of `SymPy` symbols.
+
+        Returns
+        -------
+        numpy.ndarray
+            2d NumPy array 'A'
+
+        numpy.ndarray
+            1d NumPy array 'b'
+
+        list, Optional
+            A list of `SymPy` symbols. Only if `return_coeffs` is `True`.
+
+        """
+        if not self.has_standardform():
+            P = self.simplify(maximize=maximize)
+        else:
+            P = self
         x = P.variables
         n = len(x)
-        zeros = np.zeros((n,), dtype=np.float32)
+        zeros = np.zeros((n,), dtype=float)
         b = - P.eval_constraints(zeros)
         A = []
         for c in P.constraints:
             coeffs = c.linear_coefficients(normalize=True)
-            A.append(np.array([coeffs[x_] for x_ in x], dtype=np.float32))
+            A.append(np.array([coeffs[x_] for x_ in x], dtype=float))
         A = np.vstack(A)
         coeffs = P.obj.linear_coefficients(normalize=True)
-        c = np.array([coeffs[x_] for x_ in x], dtype=np.float32)
+        if return_coeffs:
+            coeffs = P.obj.linear_coefficients(normalize=True)
+            c = np.array([coeffs[x_] for x_ in x], dtype=float)
+            return A, b, c
+        return A, b
 
-        # calculate solution
-        x_ = LLP.solve_standard_form(A, b, c, order=order)
-        if x_ is not None:
-            self.vmanager.substitute({v: val
-                                     for v, val in zip(P.variables, x_)})
-            if as_dict:
-                return self.vmanager.vmap
-            else:
-                return np.array(list(self.vmanager.vmap.values()),
-                                dtype=np.float32)
-        else:
-            return None
+    def maximize(self, *args, **kwargs):
+        """
+        Solves the LPP as a maximization. For the possible arguments, see `solve`.
 
+        """
+        kwargs['maximize'] = True
+        return self.solve(*args, **kwargs)
 
-if __name__ == '__main__':
+    def solve(self, order=None, return_all=True, maximize=False,
+              as_dict=False, raise_errors=False, tol: float = 1e-10):
+        """
+        Solves the problem and return the solution(s) if there are any.
 
-    """
-    Example for unique solution
-    (0, 6, 0, 4) --> 10
-    The following order automatically creates
-    a feasble solution : [0, 2, 3, 1]
-    """
-    variables = ['x1', 'x2', 'x3', 'x4']
-    x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
-    obj1 = Function(3*x1 + 9*x3 + x2 + x4, variables=syms)
-    eq11 = Equality(x1 + 2*x3 + x4 - 4, variables=syms)
-    eq12 = Equality(x2 + x3 - x4 - 2, variables=syms)
-    P1 = LLP(cost=obj1, constraints=[eq11, eq12], variables=syms)
-    x_1 = P1.solve(order=[0, 2, 3, 1])
-    print(x_1)
+        Parameters
+        ----------
+        order : Iterable, Optional.
+            The order of the variables. This might speed up finding the
+            basic solution. Default is None.
 
-    """
-    Example for degenerate solution.
-    (0, 2, 0, 0)
-    """
-    variables = ['x1', 'x2', 'x3', 'x4']
-    x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
-    obj2 = Function(3*x1 + x2 + 9*x3 + x4, variables=syms)
-    eq21 = Equality(x1 + 2*x3 + x4, variables=syms)
-    eq22 = Equality(x2 + x3 - x4 - 2, variables=syms)
-    P2 = LLP(cost=obj2, constraints=[eq21, eq22], variables=syms)
-    x_2 = P2.solve()
-    print(x_2)
-    
-    """
-    Example for no solution.
-    """
-    variables = ['x1', 'x2', 'x3', 'x4']
-    x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
-    obj3 = Function(-3*x1 + x2 + 9*x3 + x4, variables=syms)
-    eq31 = Equality(x1 - 2*x3 - x4 + 2, variables=syms)
-    eq32 = Equality(x2 + x3 - x4 - 2, variables=syms)
-    P3 = LLP(cost=obj3, constraints=[eq31, eq32], variables=syms)
-    x_3 = P3.solve()
-    print(x_3)
-    
-    """
-    Example for multiple solutions.
-    (0, 1, 1, 0), (0, 4, 0, 2)
-    """
-    variables = ['x1', 'x2', 'x3', 'x4']
-    x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
-    obj4 = Function(3*x1 + 2*x2 + 8*x3 + x4, variables=syms)
-    eq41 = Equality(x1 - 2*x3 - x4 + 2, variables=syms)
-    eq42 = Equality(x2 + x3 - x4 - 2, variables=syms)
-    P4 = LLP(cost=obj4, constraints=[eq41, eq42], variables=syms)
-    x_4 = P4.solve()
-    print(x_4)
+        as_dict: bool
+            If `True`, the results are returned as a dictionary, where the
+            keys are sympy symbols of the variables of the problem.
+        
+        raise_errors : bool
+            If `True`, the solution raises the actual errors on exception events,
+            otherwise they get returned within the result, under key `e`.
+        
+        tol : float, Optional
+            Floating point tolerance. Default is 1e-10.
+
+        Notes
+        -----
+        It is assumed that this function gets invoked on relatively small problems.
+        For large-scale situations, we suggest to use `solve_standard_form` function
+        of this class instead. Contrary to this one, it rases errors, while the more
+        high-level `solve` method of the instance catches those errors, and returns
+        them as part of the returned dictionary.
+
+        Returns
+        -------
+        dict
+            A dictionary with the following items:
+                x : numpy.ndarray or dict
+                    The solution as an array or a dictionary, depending on your input.
+                e : Iterable
+                    A list of errors that occured during solution.
+                time : dict
+                    A dictionary with information of execution times of the main stages
+                    of the calculation.
+
+        """
+        summary = {'time' : {}, 'x' : None, 'e': []}
+        try:
+            # general form -> standard form
+            _t0 = time()
+            P = self.simplify(maximize=maximize, inplace=False)
+            A, b, c = P.to_numpy(maximize=False, return_coeffs=True)
+            summary['time']['preproc'] = time() - _t0
+
+            # calculate solution
+            _cls = self.__class__
+            _t0 = time()
+            x = _cls.solve_standard_form(A, b, c, order=order, tol=tol)
+            summary['time']['solution'] = time() - _t0
+            
+            # standard form -> general form
+            _t0 = time()
+            res = None
+            if x is not None:
+                svars = P.variables  # standard variables
+                gvars = self.variables  # general variables
+                if not return_all:
+                    x = x[0]
+                x = atleast2d(x)
+                if as_dict:
+                    arr = []
+                    gdata = {g: [] for g in gvars}
+                    for i in range(x.shape[0]):
+                        smap = {s: sx for s, sx in zip(svars, x[i])}
+                        vm = P._hook.vm.substitute(smap, inplace=False)
+                        [gdata[g].append(vm[g]) for g in gvars]
+                    res = {g: np.squeeze(np.array(gdata[g], dtype=float)) for g in gvars}                
+                else:
+                    arr = []
+                    for i in range(x.shape[0]):
+                        smap = {s: sx for s, sx in zip(svars, x[i])}
+                        vm = P._hook.vm.substitute(smap, inplace=False)
+                        vals = [vm[g] for g in gvars]
+                        arr.append(np.array(list(vals), dtype=float))
+                    res = np.squeeze(np.stack(arr))                
+            summary['x'] = res
+            summary['time']['postproc'] = time() - _t0
+        except Exception as e:
+            summary['e'].append(e)
+        finally:
+            if len(summary['e']) > 0:
+                summary['time']['solution'] = None
+                if raise_errors:
+                    raise summary['e'][0]    
+            return summary
+        
+    def show(self, *args, **kwargs):
+        pass

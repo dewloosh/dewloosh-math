@@ -37,6 +37,47 @@ class VectorBase(ArrayBase):
 
 
 class Vector(Array):
+    """
+    Extends `NumPy`'s `ndarray` class to handle arrays with associated
+    reference frames. The class also provides a mechanism to transform
+    vectors between different frames.
+        
+    Examples
+    --------
+    Import the necessary classes:
+    
+    >>> from dewloosh.math import Vector, ReferenceFrame as Frame
+    
+    Create a default frame in 3d space, and create 2 others, each
+    being rotated with 30 degrees around the third axis.
+    
+    >>> A = Frame(dim=3)
+    >>> B = A.orient_new('Body', [0, 0, 30*np.pi/180], 'XYZ')
+    >>> C = B.orient_new('Body', [0, 0, 30*np.pi/180], 'XYZ')
+
+    To create a vector in a frame:
+    
+    >>> vA = Vector([1.0, 1.0, 0.0], frame=A)
+    
+    To create a vector with a relative transformation to another one:
+    
+    >>> vB = vA.orient_new('Body', [0, 0, -30*np.pi/180], 'XYZ')
+    
+    Use the `array` property to query the componets of a `Vector`:
+    
+    >>> vB.array
+    
+    If you want to obtain the components of a vector in a specific
+    target frame (C), do this:
+    
+    >>> vB.show(C)
+    
+    Hence, to create a vector in a target frame (C), knowing the components in a 
+    source frame (A):
+    
+    >>> vC = Vector(vA.show(C), frame=C)
+    
+    """
 
     _array_cls_ = VectorBase
     _frame_cls_ = Frame
@@ -63,12 +104,24 @@ class Vector(Array):
 
     def show(self, target: Frame = None, *args, dcm=None, **kwargs) -> ndarray:
         """
-        Returns the components in a target frame. If the target is None,
-        returns the components in the global frame.
+        Returns the components in a target frame. If the target is 
+        `None`, the components are returned in the global frame.
+        
+        The transformation can also be specified with a proper DCM matrix.
+        
+        Parameters
+        ----------
+        target : ndarray, Optional.
+            Target frame.
+        
+        dcm : ndarray, Optional.
+            The dcm matrix of the transformation.
 
-        Returns:
-        --------        
+        Returns
+        -------      
         numpy.ndarray
+            The components of the vector in a specified frame, or
+            the global frame, depending on the arguments.
 
         """
         if not isinstance(dcm, ndarray):

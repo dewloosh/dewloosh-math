@@ -8,7 +8,7 @@ from dewloosh.core.tools import getasany
 from .function import Function
 
 
-__all__ = ['Equality', 'InEquality']
+__all__ = ['Equality', 'InEquality', 'Relation']
 
 
 class Relations(Enum):
@@ -34,6 +34,9 @@ RelationType = TypeVar('RelationType', str, Relations, Callable)
 
 
 class Relation(Function):
+    """
+    Base class for relations.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -55,7 +58,8 @@ class Relation(Function):
         self.slack = 0
 
     @property
-    def operator(self):
+    def operator(self) -> Callable:
+        """Returns the associated operator"""
         return self.op
 
     def to_eq(self):
@@ -64,11 +68,21 @@ class Relation(Function):
     def relate(self, *args, **kwargs):
         return self.opfunc(self.f0(*args, **kwargs), 0)
 
-    def __call__(self, *args, **kwargs):
-        return self.opfunc(self.f0(*args, **kwargs), 0)
-
 
 class Equality(Relation):
+    """
+    Class for equality constraints.
+
+    Example
+    -------
+    >>> import sympy as sy
+    >>> variables = ['x1', 'x2', 'x3', 'x4']
+    >>> x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
+    >>> eq1 = Equality(x1 + 2*x3 + x4 - 4, variables=syms)
+    >>> eq2 = Equality(x2 + x3 - x4 - 2, variables=syms)
+
+    """
+
     def __init__(self, *args, **kwargs):
         kwargs['op'] = Relations.eq
         super().__init__(*args, **kwargs)
@@ -78,23 +92,31 @@ class Equality(Relation):
 
 
 class InEquality(Relation):
+    """
+    Class for inequality constraints.
+
+    Examples
+    --------
+    >>> gt = InEquality('x + y', op='>')
+    >>> gt([0.0, 0.0])
+    False
+
+    >>> ge = InEquality('x + y', op='>=')
+    >>> ge([0.0, 0.0])
+    True
+
+    >>> le = InEquality('x + y', op=lambda x, y: x <= y)
+    >>> le([0.0, 0.0])
+    True
+
+    >>> lt = InEquality('x + y', op=lambda x, y: x < y)
+    >>> lt([0.0, 0.0])
+    False
+
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def to_eq(self):
         raise
-
-
-if __name__ == '__main__':
-
-    gt = InEquality('x + y', op='>')
-    print(gt([0.0, 0.0]))
-
-    ge = InEquality('x + y', op='>=')
-    print(ge([0.0, 0.0]))
-
-    le = InEquality('x + y', op=lambda x, y: x <= y)
-    print(le([0.0, 0.0]))
-
-    lt = InEquality('x + y', op=lambda x, y: x < y)
-    print(lt([0.0, 0.0]))

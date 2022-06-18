@@ -1,7 +1,38 @@
-dewloosh.math
-=============
+==============================================
+DewLoosh.Math - Numerical and Symbolic Methods
+==============================================
 
-Numerical and symbolical unitilties and classes to support other `dewloosh` projects.
+`DewLoosh` is a rapid prototyping platform focused on numerical calculations 
+mainly corcerned with simulations of natural phenomena. It provides a set of common 
+functionalities and interfaces with a number of state-of-the-art open source 
+packages to combine their power seamlessly under a single development
+environment.
+
+Dependencies
+------------
+
+The implementations in this module rely heavily on 
+
+* | `NumPy`, `SciPy` and `Numba` to speed up computationally sensitive parts,
+
+* | `SymPy` for symbolic operations and some vector algebra,
+
+* | the `awkward` library for its high performance data structures, gpu support
+  | and general `Numba` compliance.
+
+
+Features
+--------
+
+* | Numba-jitted classes and an extendible factory to define and manipulate 
+  | vectors and tensors.
+
+* | Classes to define and solve linear and nonlinear optimization
+  | problems.
+
+* | A set of array routines for fast prorotyping, including random data creation
+  | to assure well posedness, or other properties of test problems.
+
 
 Contents
 --------
@@ -9,6 +40,7 @@ Contents
 .. toctree::
    :maxdepth: 3
    
+   user_guide
    api
    
 Indices and tables

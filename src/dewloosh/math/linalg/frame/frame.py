@@ -110,7 +110,7 @@ class ReferenceFrame(Array):
         return self.dcm(target=target)
 
     def dcm(self, *args, target: 'ReferenceFrame' = None,
-            source: 'ReferenceFrame' = None, **kwargs):
+            source: 'ReferenceFrame' = None, **kwargs) -> ndarray:
         """
         Returns the direction cosine matrix (DCM) of a transformation
         from a source (S) to a target (T) frame. The current frame can be the 
@@ -131,8 +131,8 @@ class ReferenceFrame(Array):
         target : 'ReferenceFrame', Optional
             Target frame. Default is None.
 
-        Returns:
-        --------        
+        Returns
+        -------     
         numpy.ndarray
             DCM matrix from S to T.
 
@@ -144,7 +144,14 @@ class ReferenceFrame(Array):
         elif target is not None:
             # target must be a 3x3 array
             S, T = self.dcm(), target.dcm()
-            return T @ transpose_dcm_multi(S)
+            if len(S.shape) == 3:
+                return T @ transpose_dcm_multi(S)
+            elif len(S.shape) == 2:
+                return T @ S.T
+            else:
+                msg = "There is no transformation rule imlemented for" \
+                    " source shape {} and target shape {}"
+                raise NotImplementedError(msg.format(S.shape, T.shape))
         # We only get here if the function is called without arguments.
         # The dcm from the ambient frame to the current frame is returned.
         if self.parent is None:
@@ -182,8 +189,8 @@ class ReferenceFrame(Array):
         `sympy.orientnew`.
 
         Parameters
-        ==========
-
+        ----------
+        
         name : str
             Name for the new reference frame.
 
@@ -217,8 +224,8 @@ class ReferenceFrame(Array):
             ``'123'`` and integer ``123`` are equivalent, for example. Required
             for ``'Body'`` and ``'Space'``.
 
-        Returns:
-        ========      
+        Returns
+        -------    
 
         ReferenceFrame
             A new ReferenceFrame object.

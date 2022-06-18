@@ -52,7 +52,7 @@ extensions = [
     # Napoleon is a extension that enables Sphinx to parse both NumPy and Google style docstrings
     'sphinx.ext.napoleon',
     
-    #'sphinx.ext.mathjax',
+    'sphinx.ext.mathjax',
     
     #'sphinx.ext.coverage',
     ]
@@ -88,3 +88,8 @@ html_title = "dewloosh.math"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
+
+myst_enable_extensions = [
+    "amsmath",
+    "dollarmath",
+]

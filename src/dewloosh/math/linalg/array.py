@@ -2,10 +2,11 @@
 import numpy as np
 from numpy.lib.mixins import NDArrayOperatorsMixin
 
-from dewloosh.core.wrap import Wrapper
+from dewloosh.core import Wrapper
 from dewloosh.core.abc import ABC_Safe
 
 from ..array import ascont
+
 
 __all__ = ['ArrayBase', 'Array']
 

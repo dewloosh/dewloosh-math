@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from abc import abstractmethod
+from typing import Iterable, Callable
 import numpy as np
 
 
-__all__ = ['BinaryGeneticAlgorithm']
+__all__ = ['GeneticAlgorithm', 'BinaryGeneticAlgorithm']
 
 
 def even(n): return n % 2 == 0
@@ -12,24 +13,43 @@ def odd(n): return not even(n)
 
 class GeneticAlgorithm:
     """
-    Binary Generic algorithm for continuous problems.
+    Base class for Genetic Algorithms (GA).
+    
+    Note
+    ----
+    The problem must be formulated as a minimization.
 
-    positional arguments:
+    Parameters
+    ----------
         fnc : Callable
-        ranges : sequence of pairs of limits for each variable
-        length : chromosome length / string length
-        p_c : probability of crossover
-        p_m : probability of mutation
-        nPop : number of members in the population
-        elitism : float or integer
+            The fittness function.
+
+        ranges : Iterable
+            sequence of pairs of limits for each variable
+
+        length : int, Optional.
+            Chromosome length (string length). Default is 5.
+
+        p_c : float, Optional. 
+            Probability of crossover, 0 <= p_c <= 1. Default is 1.
+
+        p_m : float, Optional.
+            Probability of mutation, 0 <= p_m <= 1. Default is 0.2.
+
+        nPop : int, Optional
+            Number of members in the population. Default is 100.
+
+        elitism : float or integer, Optional.
+            Value to control elitism. Default is 1.
+            
     """
 
-    def __init__(self, fnc, ranges, length=5, p_c=1, p_m=0.2, nPop=100,
-                 *args, **kwargs):
+    def __init__(self, fnc: Callable, ranges: Iterable, *args, 
+                 length=5, p_c=1, p_m=0.2, nPop=100, **kwargs):
         super().__init__()
         self.fnc = fnc
         self.ranges = np.array(ranges)
-        self.dim = fnc.dimension
+        self.dim = getattr(fnc, 'dimension', self.ranges.shape[0])
         self.length = length
         self.p_c = p_c
         self.p_m = p_m
@@ -47,7 +67,7 @@ class GeneticAlgorithm:
         self._genotypes = None
         self._fittness = None
         self.reset()
-        self.set_solution_params(**kwargs)
+        self._set_solution_params(**kwargs)
 
     @property
     def genotypes(self):
@@ -62,8 +82,8 @@ class GeneticAlgorithm:
         self._evolver = self.evolver()
         self._evolver.send(None)
 
-    def set_solution_params(self, tol=1e-12, maxiter=200, miniter=100,
-                            elitism=1, **kwargs):
+    def _set_solution_params(self, tol=1e-12, maxiter=200, miniter=100,
+                             elitism=1, **kwargs):
         self.tol = tol
         self.maxiter = np.max([miniter, maxiter])
         self.miniter = np.min([miniter, maxiter])
@@ -90,9 +110,12 @@ class GeneticAlgorithm:
             value = _value
 
     def solve(self, reset=False, returnlast=False, **kwargs):
+        """
+        Returns the best phenotype.
+        """
         if reset:
             self.reset()
-        self.set_solution_params(**kwargs)
+        self._set_solution_params(**kwargs)
         criteria = self.criteria()
         criteria.send(None)
         criteria.send(self.fnc(self.best_phenotype()))
@@ -107,11 +130,11 @@ class GeneticAlgorithm:
         self.nIter = nIter
         return self.best_phenotype(lastknown=returnlast)
 
-    def fittness(self, phenotypes=None, dtype=np.float32):
+    def fittness(self, phenotypes=None):
         if phenotypes is not None:
             self._fittness = np.array([self.fnc(x) for x in phenotypes],
-                                      dtype=dtype)
-        return self._fittness.astype(dtype)
+                                      dtype=float)
+        return self._fittness
 
     def best_phenotype(self, lastknown=False):
         if lastknown:
@@ -123,9 +146,26 @@ class GeneticAlgorithm:
 
     def divide(self, fittness=None):
         """
-        Divides population to elit and others,
-        and returns the corresponding index arrays.
+        Divides population to elit and others, and returns the corresponding 
+        index arrays.
+
+        Parameters
+        ----------
+        fittness : Iterable, optional
+            Fittness values. If not provided, values from the latest
+            evaluation are used.
+
+        Returns
+        -------
+        list
+            Indices of the members of the elite.
+
+        list
+            Indices of the members of the others.
+
         """
+        fittness = self.fittness() if fittness is None else fittness
+        assert fittness is not None, "No available fittness data detected."
         if self.elitism < 1:
             argsort = np.argsort(fittness)
             elit = argsort[:int(self.nPop*self.elitism)]
@@ -139,11 +179,19 @@ class GeneticAlgorithm:
             others = list(range(self.nPop))
         return list(elit), others
 
-    def random_parents_generator(self, genotypes=None):
+    @classmethod
+    def random_parents_generator(cls, genotypes=None):
         """
-        Returns random pairs from a list of genotypes.
-        This assumes theat the length of the input array is
-        a multiple of 2.
+        Yields random pairs from a list of genotypes.
+
+        The implamantation assumes theat the length of the input array 
+        is a multiple of 2.
+
+        Parameters
+        ----------
+        genotypes : Iterable
+            Genotypes of the parents as a 2d integer array.
+
         """
         n = len(genotypes)
         assert n % 2 == 0
@@ -160,28 +208,98 @@ class GeneticAlgorithm:
 
     @abstractmethod
     def populate(self, genotypes=None):
+        """To be implemented"""
         ...
 
     @abstractmethod
     def decode(self, genotypes=None):
+        """To be implemented"""
         ...
 
     @abstractmethod
     def crossover(self, parent1=None, parent2=None):
+        """To be implemented"""
         ...
 
     @abstractmethod
     def mutate(self, child=None):
+        """To be implemented"""
         ...
 
     @abstractmethod
     def select(self, genotypes=None, phenotypes=None):
+        """To be implemented"""
         ...
 
 
 class BinaryGeneticAlgorithm(GeneticAlgorithm):
+    """
+    An implementation of a Binary Genetic Algorithm (BGA).
+    
+    Note
+    ----
+    The problem must be formulated as a minimization.
+    
+    Parameters
+    ----------
+        fnc : Callable
+            The fittness function.
+
+        ranges : Iterable
+            sequence of pairs of limits for each variable
+
+        length : int, Optional.
+            Chromosome length (string length). Default is 5.
+
+        p_c : float, Optional. 
+            Probability of crossover, 0 <= p_c <= 1. Default is 1.
+
+        p_m : float, Optional.
+            Probability of mutation, 0 <= p_m <= 1. Default is 0.2.
+
+        nPop : int, Optional
+            Number of members in the population. Default is 100.
+
+        elitism : float or integer, Optional.
+            Value to control elitism. Default is 1.
+
+    Examples
+    --------
+    Find the minimizer of the Rosenbrock function. 
+    The exact value of the solution is x = [1.0, 1.0].
+
+    >>> def Rosenbrock(x, y):
+    >>>     a = 1, b = 100
+    >>>     return (a-x)**2 + b*(y-x**2)**2
+    >>> ranges = [
+    >>>     [-10, 10],
+    >>>     [-10, 10]
+    >>> ]
+    >>> BGA = BinaryGeneticAlgorithm(Rosenbrock, ranges, length=12, nPop=200)
+    >>> BGA.solve()
+    array([0.99389553, 0.98901176])
+    
+    The following code prints the history using the `evolve` generator of 
+    the object
+    
+    >>> import matplotlib.pyplot as plt
+    >>> BGA = BinaryGeneticAlgorithm(f, ranges, length=12, nPop=200)
+    >>> history = [f(BGA.best_phenotype())]
+    >>> for _ in range(100):
+    >>>     BGA.evolve(1)
+    >>>     history.append(f(BGA.best_phenotype()))
+    >>> plt.plot(history)
+    >>> plt.show()
+    >>> x = BGA.best_phenotype()
+    >>> fx = f(x)
+    >>> print('min {} @ {}'.format(fx,x))
+
+    """
 
     def populate(self, genotypes=None):
+        """
+        Populates the model from a list of genotypes as seeds.
+        """
         nPop = self.nPop
         if genotypes is None:
             poolshape = (int(nPop / 2), self.dim * self.length)
@@ -201,20 +319,27 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
                 raise RuntimeError
         return genotypes
 
-    def decode(self, genotypes=None):
+    def decode(self, genotypes: np.ndarray = None) -> np.ndarray:
+        """
+        Decodes the genotypes to phenotypes.
+        """
         span = (2**self.length - 2**0)
         genotypes = genotypes.reshape((self.nPop, self.dim, self.length))
         precisions = [(self.ranges[d, -1] - self.ranges[d, 0]) / span
                       for d in range(self.dim)]
         phenotypes = \
             np.sum([genotypes[:, :, i]*2**i
-                    for i in range(self.length)], axis=0).astype(np.float32)
+                    for i in range(self.length)], axis=0).astype(float)
         for d in range(self.dim):
             phenotypes[:, d] *= precisions[d]
             phenotypes[:, d] += self.ranges[d, 0]
         return phenotypes
 
     def crossover(self, parent1=None, parent2=None, nCut=None):
+        """
+        Performs crossover on the parents `parent1` and `parent2`, 
+        using an `nCut` number of cuts.
+        """
         if np.random.rand() > self.p_c:
             return parent1, parent2
 
@@ -227,8 +352,8 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         cuts.extend(p)
         cuts = np.sort(cuts)
 
-        child1 = np.zeros(self.dim*self.length, dtype=np.int32)
-        child2 = np.zeros(self.dim*self.length, dtype=np.int32)
+        child1 = np.zeros(self.dim*self.length, dtype=int)
+        child2 = np.zeros(self.dim*self.length, dtype=int)
 
         randBool = np.random.rand() > 0.5
         for i in range(nCut+1):
@@ -242,46 +367,20 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         return self.mutate(child1), self.mutate(child2)
 
     def mutate(self, child=None):
+        """
+        Mutates a child.
+        """
         p = np.random.rand(self.dim*self.length)
         return np.where(p > self.p_m, child, 1-child)
 
     def select(self, genotypes=None, phenotypes=None):
+        """
+        Organizes a tournament and returns the winners.
+        """
         fittness = self.fittness(phenotypes)
         winners, others = self.divide(fittness)
         while len(winners) < int(self.nPop / 2):
             candidates = np.random.choice(others, 3, replace=False)
             winner = np.argsort([fittness[ID] for ID in candidates])[0]
             winners.append(candidates[winner])
-        return np.array([genotypes[w] for w in winners], dtype=np.float32)
-
-
-if __name__ == '__main__':
-
-    def Rosenbrock(a, b, x, y):
-        return (a-x)**2 + b*(y-x**2)**2
-
-    def f(x):
-        return Rosenbrock(1, 100, x[0], x[1])
-
-    f.dimension = 2
-    ranges = [
-        [-10, 10],
-        [-10, 10]
-    ]
-    BGA = BinaryGeneticAlgorithm(f, ranges, length=12, nPop=200)
-    r = BGA.solve()
-    print(r)
-    
-    # plot the history
-    import matplotlib.pyplot as plt
-    BGA = BinaryGeneticAlgorithm(f, ranges, length=12, nPop=200)
-    history = [f(BGA.best_phenotype())]
-    for _ in range(100):
-        BGA.evolve(1)
-        history.append(f(BGA.best_phenotype()))
-    plt.plot(history)
-    plt.show()
-    x = BGA.best_phenotype()
-    fx = f(x)
-    print('min {} @ {}'.format(fx,x))
-    
+        return np.array([genotypes[w] for w in winners], dtype=float)
