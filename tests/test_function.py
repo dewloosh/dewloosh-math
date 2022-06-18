@@ -27,16 +27,16 @@ class TestRelations(unittest.TestCase):
 
     def test_InEquality(self):
         gt = InEquality('x + y', op='>')
-        assert not gt([0.0, 0.0])
+        assert not gt.relate([0.0, 0.0])
 
         ge = InEquality('x + y', op='>=')
-        assert ge([0.0, 0.0])
+        assert ge.relate([0.0, 0.0])
 
         le = InEquality('x + y', op=lambda x, y: x <= y)
-        assert le([0.0, 0.0])
+        assert le.relate([0.0, 0.0])
 
         lt = InEquality('x + y', op=lambda x, y: x < y)
-        assert not lt([0.0, 0.0])
+        assert not lt.relate([0.0, 0.0])
 
 
 if __name__ == "__main__":
