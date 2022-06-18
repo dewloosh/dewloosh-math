@@ -27,7 +27,7 @@ class TestLPP(unittest.TestCase):
         _x = np.array([0., 6., 0., 4.])
         assert np.all(np.isclose(_x, x))
     
-    """def test_degenerate_solution(self):
+    def test_degenerate_solution(self):
         variables = ['x1', 'x2', 'x3', 'x4']
         x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
         obj2 = Function(3*x1 + x2 + 9*x3 + x4, variables=syms)
@@ -39,7 +39,7 @@ class TestLPP(unittest.TestCase):
         except DegenerateProblemError:
             pass
         except Exception:
-            assert False"""
+            assert False
                 
     def test_no_solution(self):
         """

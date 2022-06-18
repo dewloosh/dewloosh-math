@@ -659,7 +659,7 @@ class LinearProgrammingProblem:
                 # The objective can not be further reduced.
                 # There was only one basic solution, which is
                 # a unique optimizer.
-                d = np.count_nonzero(reduced_costs > 0)
+                d = np.count_nonzero(reduced_costs >= tol)
                 if d < len(reduced_costs):
                     # there are edges along with the objective does
                     # not increase
