@@ -2,7 +2,6 @@
 from hypothesis import given, settings, strategies as st, HealthCheck
 import unittest
 import numpy as np
-from time import time
 
 from dewloosh.math.array import random_pos_semidef_matrix, random_posdef_matrix, \
     ispossemidef, isposdef
@@ -81,7 +80,7 @@ class TestTransform(unittest.TestCase):
             
 class Test3x3(unittest.TestCase):
         
-    @given(st.integers(min_value=1, max_value=10))
+    @given(st.integers(min_value=2, max_value=10))
     def test_linsolve_3x3(self, shift):
         A = random_posdef_matrix(3) + shift
         b = np.random.rand(3) + shift

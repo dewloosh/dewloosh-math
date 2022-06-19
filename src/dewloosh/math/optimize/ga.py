@@ -12,8 +12,7 @@ def odd(n): return not even(n)
 
 
 class GeneticAlgorithm:
-    """
-    Base class for Genetic Algorithms (GA). Use this as a base 
+    """Base class for Genetic Algorithms (GA). Use this as a base 
     class to your custom implementation of a GA.
                 
     """
@@ -84,10 +83,7 @@ class GeneticAlgorithm:
             value = _value
 
     def solve(self, reset=False, returnlast=False, **kwargs):
-        """
-        Returns the best phenotype.
-        
-        """
+        """Returns the best phenotype."""
         if reset:
             self.reset()
         self._set_solution_params(**kwargs)
@@ -120,8 +116,7 @@ class GeneticAlgorithm:
         return self.phenotypes[best]
 
     def divide(self, fittness=None):
-        """
-        Divides population to elit and others, and returns the corresponding 
+        """Divides population to elit and others, and returns the corresponding 
         index arrays.
 
         Parameters
@@ -156,8 +151,7 @@ class GeneticAlgorithm:
 
     @classmethod
     def random_parents_generator(cls, genotypes=None):
-        """
-        Yields random pairs from a list of genotypes.
+        """Yields random pairs from a list of genotypes.
 
         The implamantation assumes theat the length of the input array 
         is a multiple of 2.

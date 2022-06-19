@@ -5,7 +5,11 @@ from numpy.linalg import LinAlgError
 import sympy as sy
 from sympy.utilities.iterables import multiset_permutations
 from copy import copy, deepcopy
-from collections import defaultdict, Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+from collections import defaultdict
 from typing import Tuple
 from enum import Enum, auto, unique
 from time import time
@@ -31,8 +35,7 @@ class LinearProgrammingResult(Enum):
     
 
 class LinearProgrammingProblem:
-    """
-    Class to handle general linear programming problems. It gaps the 
+    """A lightweight class to handle general linear programming problems. It gaps the 
     bridge between the general form and the standard form. The class accepts
     symbolic expressions, but this should not be expected to be too fast. 
     For problems starting from medium size, it is suggested to use the 
@@ -165,8 +168,7 @@ class LinearProgrammingProblem:
 
     @staticmethod
     def example_unique() -> 'LinearProgrammingProblem':
-        """
-        Returns teh following LPP:
+        """Returns teh following LPP:
 
         .. math::
             :nowrap:
@@ -202,9 +204,7 @@ class LinearProgrammingProblem:
         return P
 
     def add_constraint(self, *args, **kwargs):
-        """
-        Adds a new constraint to the system.
-        """
+        """Adds a new constraint to the system."""
         if isinstance(args[0], Function):
             if isinstance(args[0], InEquality):
                 assert args[0].op in [Relations.ge, Relations.le], \
@@ -226,9 +226,7 @@ class LinearProgrammingProblem:
         self.vmanager.add_variables(s)
 
     def _shift_variables(self):
-        """
-        Handle variables not restricted in sign.
-        """
+        """Handle variables not restricted in sign."""
         vmap = dict()
         tmpl = self.__class__.__tmpl_shift__
         count = 1
@@ -240,9 +238,7 @@ class LinearProgrammingProblem:
         self.vmanager.substitute(vmap)
 
     def get_system_variables(self) -> list:
-        """
-        Returns all variables of the system.
-        """
+        """Returns all variables of the system."""
         s = set()
         s.update(self.obj.variables)
         for c in self.constraints:
@@ -264,8 +260,7 @@ class LinearProgrammingProblem:
         return y
 
     def has_standardform(self) -> bool:
-        """
-        Tells if the object admits the standard form of a linear program or not.
+        """Tells if the object admits the standard form of a linear program or not.
 
         Notes
         -----
@@ -284,8 +279,7 @@ class LinearProgrammingProblem:
         return all_pos and all_eq
 
     def simplify(self, maximize=False, inplace=False) -> 'LinearProgrammingProblem':
-        """
-        Simplifies the problem so that it admits the standard form. 
+        """Simplifies the problem so that it admits the standard form. 
 
         This is done in 3 steps:
 
@@ -410,14 +404,11 @@ class LinearProgrammingProblem:
             return lpp
 
     def eval_constraints(self, x: Iterable) -> Iterable:
-        """
-        Evaluates the constraints at `x`.
-        """
+        """Evaluates the constraints at `x`."""
         return np.array([c.f0(x) for c in self.constraints], dtype=float)
 
     def feasible(self, x: Iterable = None) -> bool:
-        """
-        Returns `True` if `x` is a feasible candidate to the current problem,
+        """Returns `True` if `x` is a feasible candidate to the current problem,
         `False` othwerise.
         """
         c = [c.relate(x) for c in self.constraints]
@@ -428,8 +419,7 @@ class LinearProgrammingProblem:
 
     @staticmethod
     def basic_solution(A=None, b=None, order=None) -> Tuple[ndarray]:
-        """
-        Returns a basic solution to a problem the form
+        """Returns a basic solution to a problem the form
 
         .. math::
             :nowrap:
@@ -521,8 +511,7 @@ class LinearProgrammingProblem:
     @staticmethod
     def solve_standard_form(A: ndarray, b: ndarray, c: ndarray, order=None,
                             tol: float = 1e-10):
-        """
-        Solves a linear problem in standard form:
+        """Solves a linear problem in standard form:
 
         :math:`minimize \quad \mathbf{c} \mathbf{x} \quad under \quad \mathbf{A}\mathbf{x} = \mathbf{b}`.
 
@@ -690,8 +679,7 @@ class LinearProgrammingProblem:
                 break
 
     def to_numpy(self, maximize=False, return_coeffs=False):
-        """
-        Returns the complete numerical representation of the standard 
+        """Returns the complete numerical representation of the standard 
         form of the problem:
 
             :math:`minimize \quad \mathbf{c} \mathbf{x} \quad under \quad \mathbf{A}\mathbf{x} = \mathbf{b}`.
@@ -738,8 +726,7 @@ class LinearProgrammingProblem:
         return A, b
 
     def maximize(self, *args, **kwargs):
-        """
-        Solves the LPP as a maximization. For the possible arguments, see `solve`.
+        """Solves the LPP as a maximization. For the possible arguments, see `solve`.
 
         """
         kwargs['maximize'] = True
@@ -747,8 +734,7 @@ class LinearProgrammingProblem:
 
     def solve(self, order=None, return_all=True, maximize=False,
               as_dict=False, raise_errors=False, tol: float = 1e-10):
-        """
-        Solves the problem and return the solution(s) if there are any.
+        """Solves the problem and return the solution(s) if there are any.
 
         Parameters
         ----------

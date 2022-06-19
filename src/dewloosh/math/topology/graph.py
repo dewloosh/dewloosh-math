@@ -32,13 +32,13 @@ try:
                         
         """
 
-        def adjacency_matrix(self, *args, sparse=False, **kwargs):
+        def adjacency_matrix(self, *args, to_csr=False, **kwargs):
             """
             Returns the adjacency matrix of the graph.
             
             Parameters
             ----------
-            sparse : bool, Optional
+            to_csr : bool, Optional
                 If `True`, the result of `networkx.adjacency_matrix` is 
                 returned as a `csr_matrix`.
                 
@@ -68,8 +68,8 @@ try:
             Graph.pseudo_peripheral_nodes
               
             """
-            adj = ntx.adjacency_matrix(self, *args, **kwargs)
-            return csr_matrix(adj) if sparse else adj
+            adj = ntx.to_scipy_sparse_array(self, *args, **kwargs)
+            return csr_matrix(adj) if to_csr else adj
 
         def rooted_level_structure(self, root=0):
             """

@@ -3,7 +3,10 @@ import numpy as np
 from numpy import ndarray as nparray
 from numba import njit, prange
 from typing import Union, Tuple
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 __cache = True
 
 ArrayOrFloat = Union[float, np.ndarray, list]
