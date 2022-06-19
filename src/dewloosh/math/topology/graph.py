@@ -6,6 +6,8 @@ from numba.typed import Dict
 
 from ..linalg.sparse import csr_matrix
 
+__all__ = ['Graph', 'rooted_level_structure', 'pseudo_peripheral_nodes']
+
 try:
     import networkx as ntx
 
@@ -14,59 +16,59 @@ try:
         A subclass of `networkx.Graph`, extending its capabilities.
         See the documentation of `networkx` for the details on how to
         define graphs.
-        
+
         Note
         ----
         If `networkx` is not installed, the class is `NoneType`, but the
         functionality it implements is still available, you just have to
         manage graph creation by yourself.
-        
+
         Examples
         --------
         A basic example with `networkx`:
-        
+
         >>> from dewloosh.math.topology import Graph
         >>> import networkx as nx
         >>> grid = nx.grid_2d_graph(5, 5)  # 5x5 grid
         >>> G = Graph(grid)
-                        
+
         """
 
         def adjacency_matrix(self, *args, to_csr=False, **kwargs):
             """
             Returns the adjacency matrix of the graph.
-            
+
             Parameters
             ----------
             to_csr : bool, Optional
                 If `True`, the result of `networkx.adjacency_matrix` is 
                 returned as a `csr_matrix`.
-                
+
             *args : Tuple, Optional
                 Forwarded to `networkx.adjacency_matrix`
-            
+
             **args, dict, Optional
                 Forwarded to `networkx.adjacency_matrix`
-                
+
             Returns
             -------
             NumPy array, SciPy array or `csr_matrix`
                 The adjacency representation of the graph.
-            
+
             Examples
             --------
-            
+
             >>> from dewloosh.math.topology import Graph
             >>> G = Graph([(1, 1)])
             >>> A = G.adjacency_matrix()
             >>> print(A.todense())
             [[1]]
-            
+
             See Also
             --------
             Graph.rooted_level_structure
             Graph.pseudo_peripheral_nodes
-              
+
             """
             adj = ntx.to_scipy_sparse_array(self, *args, **kwargs)
             return csr_matrix(adj) if to_csr else adj
@@ -74,14 +76,14 @@ try:
         def rooted_level_structure(self, root=0):
             """
             Returns the rooted level structure (RLS) of the graph.
-            
+
             The call is forwarded to `rooted_level_structure`, go there
             to read about the possible arguments.
-            
+
             See Also
             --------
             rooted_level_structure
-                              
+
             """
             return rooted_level_structure(csr_matrix(ntx.to_scipy_sparse_array(self)), root)
 
@@ -89,20 +91,18 @@ try:
             """
             Returns the indices of nodes that are possible candidates
             for being peripheral nodes of a graph.
-            
+
             The call is forwarded to `pseudo_peripheral_nodes`, go there
             to read about the possible arguments.
-            
+
             See Also
             --------
             pseudo_peripheral_nodes
-                              
+
             """
             return pseudo_peripheral_nodes(csr_matrix(ntx.to_scipy_sparse_array(self)))
 except:
     Graph = None
-
-__all__ = ['Graph', 'rooted_level_structure', 'pseudo_peripheral_nodes']
 
 int64A = Array(int64, 1, 'C')
 
@@ -111,22 +111,22 @@ int64A = Array(int64, 1, 'C')
 def rooted_level_structure(adj: csr_matrix, root: int = 0) -> Dict:
     """
     Turns a sparse adjacency matrix into a rooted level structure.
-    
+
     Parameters
     ----------
     adj : csr_matrix
         Adjacency matrix in CSR format.
-        
+
     root : int, Optional
         Index of the root node. Default is 0.
-    
+
     Returns
     -------
     Dict
         A `numba` dictionary <int[:] : int[:, :]>, where the keys
         refer to different levels, and the values are the indices
         of nodes on that level.
-        
+
     """
     nN = len(adj.indptr) - 1
     rls = Dict.empty(
@@ -161,17 +161,17 @@ def pseudo_peripheral_nodes(adj: csr_matrix):
     """
     Returns the indices of nodes that are possible candidates
     for being peripheral nodes of a graph.
-    
+
     Parameters
     ----------
     adj : csr_matrix
         Adjacency matrix in CSR format.
-    
+
     Returns
     -------
     np.ndarray
         Integer array of nodal indices.
-    
+
     """
 
     def length_width(RLS):
