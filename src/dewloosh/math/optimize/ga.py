@@ -13,35 +13,9 @@ def odd(n): return not even(n)
 
 class GeneticAlgorithm:
     """
-    Base class for Genetic Algorithms (GA).
-    
-    Note
-    ----
-    The problem must be formulated as a minimization.
-
-    Parameters
-    ----------
-        fnc : Callable
-            The fittness function.
-
-        ranges : Iterable
-            sequence of pairs of limits for each variable
-
-        length : int, Optional.
-            Chromosome length (string length). Default is 5.
-
-        p_c : float, Optional. 
-            Probability of crossover, 0 <= p_c <= 1. Default is 1.
-
-        p_m : float, Optional.
-            Probability of mutation, 0 <= p_m <= 1. Default is 0.2.
-
-        nPop : int, Optional
-            Number of members in the population. Default is 100.
-
-        elitism : float or integer, Optional.
-            Value to control elitism. Default is 1.
-            
+    Base class for Genetic Algorithms (GA). Use this as a base 
+    class to your custom implementation of a GA.
+                
     """
 
     def __init__(self, fnc: Callable, ranges: Iterable, *args, 
@@ -112,6 +86,7 @@ class GeneticAlgorithm:
     def solve(self, reset=False, returnlast=False, **kwargs):
         """
         Returns the best phenotype.
+        
         """
         if reset:
             self.reset()
@@ -234,11 +209,18 @@ class GeneticAlgorithm:
 
 class BinaryGeneticAlgorithm(GeneticAlgorithm):
     """
-    An implementation of a Binary Genetic Algorithm (BGA).
+    An implementation of a Binary Genetic Algorithm (BGA) for finding 
+    minimums of real valued unconstrained problems of continuous variables 
+    in n-dimensional vector spaces. 
     
-    Note
-    ----
-    The problem must be formulated as a minimization.
+    In other words, it solves the following problem:
+    
+    .. math::
+            :nowrap:
+
+            \\begin{eqnarray}
+                & minimize&  \quad  f(\mathbf{x}) \quad in \quad \mathbf{x} \in \mathbf{R}^n. 
+            \\end{eqnarray}
     
     Parameters
     ----------
@@ -299,6 +281,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     def populate(self, genotypes=None):
         """
         Populates the model from a list of genotypes as seeds.
+        
         """
         nPop = self.nPop
         if genotypes is None:
@@ -322,6 +305,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     def decode(self, genotypes: np.ndarray = None) -> np.ndarray:
         """
         Decodes the genotypes to phenotypes.
+        
         """
         span = (2**self.length - 2**0)
         genotypes = genotypes.reshape((self.nPop, self.dim, self.length))
@@ -339,6 +323,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         """
         Performs crossover on the parents `parent1` and `parent2`, 
         using an `nCut` number of cuts.
+        
         """
         if np.random.rand() > self.p_c:
             return parent1, parent2
@@ -369,6 +354,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     def mutate(self, child=None):
         """
         Mutates a child.
+        
         """
         p = np.random.rand(self.dim*self.length)
         return np.where(p > self.p_m, child, 1-child)
@@ -376,6 +362,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     def select(self, genotypes=None, phenotypes=None):
         """
         Organizes a tournament and returns the winners.
+        
         """
         fittness = self.fittness(phenotypes)
         winners, others = self.divide(fittness)

@@ -8,10 +8,10 @@ functionalities and interfaces with a number of state-of-the-art open source
 packages to combine their power seamlessly under a single development
 environment.
 
-Dependencies
+Requirements
 ------------
 
-The implementations in this module rely heavily on 
+The implementations in this module are created on top of 
 
 * | `NumPy`, `SciPy` and `Numba` to speed up computationally sensitive parts,
 
@@ -34,6 +34,18 @@ Features
   | to assure well posedness, or other properties of test problems.
 
 
+Gallery
+-------
+
+.. nbgallery::
+    :caption: Gallery
+    :name: rst-gallery
+    :glob:
+    :reversed:
+
+    _notebooks/*
+    
+        
 Contents
 --------
 
@@ -41,6 +53,7 @@ Contents
    :maxdepth: 3
    
    user_guide
+   notebooks
    api
    
 Indices and tables

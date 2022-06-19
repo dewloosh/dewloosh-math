@@ -188,7 +188,7 @@ class LinearProgrammingProblem:
 
         >>> from dewloosh.math.optimize import LinearProgrammingProblem as LPP
         >>> problem = LPP.example_unique()
-        >>> problem.solve()
+        >>> problem.solve()['x']
         array([0., 6., 0., 4.])
 
         """
@@ -665,10 +665,8 @@ class LinearProgrammingProblem:
                     # not increase
                     #dc = np.abs(reduced_costs - reduced_costs.min())
                     #inds = np.where(dc <= tol)[0]
-                    # !MULTIPLE SOLUTIONS
                     return multiple_results()
                 else:
-                    # !UNIQUE SOLUTION
                     return unique_result()
             # If we reach this line, reduction of the objective is possible,
             # although maybe indefinitely. If the objective can be decreased,
