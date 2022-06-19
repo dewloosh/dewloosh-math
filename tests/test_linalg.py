@@ -35,7 +35,7 @@ class TestTransform(unittest.TestCase):
     #@given(st.integers(min_value=0, max_value=2), 
     #       st.floats(min_value=0., max_value=360.))
     #@settings(settings.load_profile("linalg_test"))
-    def test_tr_vector_1(self, i = 1.0, a=120.):
+    def test_tr_vector_1(self, i = 1, a=120.):
         """
         Applies a random rotation of a frame around a random axis
         and tests the transformation of components.
