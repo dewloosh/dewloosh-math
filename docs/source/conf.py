@@ -257,12 +257,30 @@ nbsphinx_prolog = (
     .. nbinfo::
         This page was generated from `{{ docpath }}`__.
         
-        Launch Binder `{{ docpath }}`_
-
     __ https://github.com/dewloosh/dewloosh-math/blob/
         """ +
-    git_rev + r"{{ docpath }}" + 
-    """_ https://github.com/dewloosh/dewloosh-math/blob/""" +
     git_rev + r"{{ docpath }}"
 )
 
+nbsphinx_prolog = (
+    r"""
+{% if env.metadata[env.docname]['nbsphinx-link-target'] %}
+{% set docpath = env.metadata[env.docname]['nbsphinx-link-target'] %}
+{% else %}
+{% set docpath = env.doc2path(env.docname, base='docs/source/') %}
+{% endif %}
+
+.. only:: html
+
+    .. role:: raw-html(raw)
+        :format: html
+
+    .. _this: https://github.com/dewloosh/dewloosh-math/blob/main/{{ docpath }}
+    
+    .. _binder: https://github.com/dewloosh/dewloosh-math/blob/main/{{ docpath }}
+    
+    .. nbinfo::
+        This page was generated from 
+        `{{ docpath }} <https://github.com/dewloosh/dewloosh-math/blob/main/{{ docpath }}>`_."""
+    
+)
