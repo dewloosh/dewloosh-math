@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 import numpy as np
-from numba import jit
-from hypothesis import given, settings, strategies as st
+#from numba import jit
+from hypothesis import settings
 
 from dewloosh.math.interval import Interval
 
@@ -14,27 +14,27 @@ settings.register_profile(
 )
 
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def inside_interval(interval, x):
     return interval.lo <= x < interval.hi
 
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def interval_width(interval):
     return interval.width
 
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def interval_data(interval):
     return interval.data
 
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def interval_getitem(interval, i):
     return interval[i]
 
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def new_interval(lo, hi, data):
     return Interval(lo, hi, data)
 
@@ -61,4 +61,4 @@ if __name__ == "__main__":
     interval_data(new_interval(lo, hi, data))
     interval_getitem(new_interval(lo, hi, data), 0)
 
-    unittest.main()
+    #unittest.main()
