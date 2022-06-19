@@ -41,8 +41,8 @@ def new_interval(lo, hi, data):
 
 class TestInterval(unittest.TestCase):
 
-    @given(st.floats(min_value=1, max_value=3),
-           st.floats(min_value=1, max_value=3))
+    @given(st.floats(min_value=1., max_value=3.),
+           st.floats(min_value=1., max_value=3.))
     @settings(settings.load_profile("interval"))
     def test_interval(self, lo, hi):
         data = np.array([1.1, 3.1, 2.1])
