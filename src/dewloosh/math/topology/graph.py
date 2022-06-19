@@ -10,6 +10,11 @@ __all__ = ['Graph', 'rooted_level_structure', 'pseudo_peripheral_nodes']
 
 try:
     import networkx as ntx
+    
+    try:
+        adjacency_matrix = ntx.to_scipy_sparse_array
+    except Exception:
+        adjacency_matrix = ntx.adjacency_matrix
 
     class Graph(ntx.Graph):
         """
@@ -70,7 +75,7 @@ try:
             Graph.pseudo_peripheral_nodes
 
             """
-            adj = ntx.to_scipy_sparse_array(self, *args, **kwargs)
+            adj = adjacency_matrix(self, *args, **kwargs)
             return csr_matrix(adj) if to_csr else adj
 
         def rooted_level_structure(self, root=0):
@@ -85,7 +90,7 @@ try:
             rooted_level_structure
 
             """
-            return rooted_level_structure(csr_matrix(ntx.to_scipy_sparse_array(self)), root)
+            return rooted_level_structure(csr_matrix(adjacency_matrix(self)), root)
 
         def pseudo_peripheral_nodes(self):
             """
@@ -100,7 +105,7 @@ try:
             pseudo_peripheral_nodes
 
             """
-            return pseudo_peripheral_nodes(csr_matrix(ntx.to_scipy_sparse_array(self)))
+            return pseudo_peripheral_nodes(csr_matrix(adjacency_matrix(self)))
 except:
     Graph = None
 
