@@ -114,7 +114,7 @@ must have
   * `Numba`, `NumPy`, `SciPy`, `SymPy`, `awkward`
 
 optional 
-  * `newtorkx`
+  * `networkx`
 
 ## **License**
 
