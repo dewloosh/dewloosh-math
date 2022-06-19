@@ -75,7 +75,7 @@ To run all tests, open up a console in the root directory of the project and typ
 
 ## **Dependencies**
 
-* `Numba`, `NumPy`, `SciPy`, `SymPy`, `awkward`
+[must have] `Numba`, `NumPy`, `SciPy`, `SymPy`, `awkward`
 
 ## **License**
 
