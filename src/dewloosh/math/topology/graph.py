@@ -83,7 +83,7 @@ try:
             rooted_level_structure
                               
             """
-            return rooted_level_structure(csr_matrix(ntx.adjacency_matrix(self)), root)
+            return rooted_level_structure(csr_matrix(ntx.to_scipy_sparse_array(self)), root)
 
         def pseudo_peripheral_nodes(self):
             """
@@ -98,7 +98,7 @@ try:
             pseudo_peripheral_nodes
                               
             """
-            return pseudo_peripheral_nodes(csr_matrix(ntx.adjacency_matrix(self)))
+            return pseudo_peripheral_nodes(csr_matrix(ntx.to_scipy_sparse_array(self)))
 except:
     Graph = None
 
