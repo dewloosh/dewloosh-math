@@ -7,7 +7,7 @@
 # **dewloosh.math**
 
 > **Warning**
-> This package is under active development and in an **alpha stage**. Come back later, or star the repo to make sure you don’t miss the first stable release!
+> This package is under active development and in an **beta stage**. Come back later, or star the repo to make sure you don’t miss the first stable release!
 
 `dewloosh.math` is a rapid prototyping platform focused on numerical calculations mainly corcerned with simulations of natural phenomena. It provides a set of common functionalities and interfaces with a number of state-of-the-art open source packages to combine their power seamlessly under a single development environment.
 

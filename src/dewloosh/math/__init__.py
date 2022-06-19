@@ -5,8 +5,8 @@ import numpy as np
 from dewloosh.math.hist import *
 from dewloosh.math.utils import *
 
-__version__ = "0.0.1"
-__description__ = "A math library for numerical calculations."
+__version__ = "0.0.1b"
+__description__ = "A math library for numerical and symboliccalculations."
 
 
 def squeeze_if_array(arr): return np.squeeze(
