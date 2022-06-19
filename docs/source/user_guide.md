@@ -83,10 +83,7 @@ $$
 >>> def Rosenbrock(x, y):
 >>>     a = 1, b = 100
 >>>     return (a-x)**2 + b*(y-x**2)**2
->>> ranges = [
->>>     [-10, 10],
->>>     [-10, 10]
->>> ]
+>>> ranges = [[-10, 10],[-10, 10]]
 >>> BGA = BinaryGeneticAlgorithm(Rosenbrock, ranges, length=12, nPop=200)
 >>> BGA.solve()
 array([0.99389553, 0.98901176]) 
