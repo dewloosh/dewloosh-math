@@ -5,7 +5,7 @@ import numpy as np
 from dewloosh.math.hist import *
 from dewloosh.math.utils import *
 
-__version__ = "0.0.1-alpha6"
+__version__ = "0.0.1"
 __description__ = "A math library for numerical calculations."
 
 
