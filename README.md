@@ -61,8 +61,9 @@ a feasble solution : [0, 2, 3, 1]
 >>> eq11 = Equality(x1 + 2*x3 + x4 - 4, variables=syms)
 >>> eq12 = Equality(x2 + x3 - x4 - 2, variables=syms)
 >>> lpp = LPP(cost=obj1, constraints=[eq11, eq12], variables=syms)
->>> lpp.solve(order=[0, 2, 3, 1], raise_errors=True)['x']
+>>> lpp.solve()['x']
 array([0., 6., 0., 4.])
+
 ```
 
 ## **Testing**
@@ -75,7 +76,11 @@ To run all tests, open up a console in the root directory of the project and typ
 
 ## **Dependencies**
 
-[must have] `Numba`, `NumPy`, `SciPy`, `SymPy`, `awkward`
+must have 
+  * `Numba`, `NumPy`, `SciPy`, `SymPy`, `awkward`
+
+optional 
+  * `newtorkx`
 
 ## **License**
 
