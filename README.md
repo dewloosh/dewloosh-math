@@ -9,15 +9,15 @@
 > **Warning**
 > This package is under active development and in an **alpha stage**. Come back later, or star the repo to make sure you don’t miss the first stable release!
 
-This package contains common developer utilities to support other `dewloosh` solutions. Everything is pure Python, the package requires no extra dependencies and should run on a minimal setup.
+`dewloosh.math` is a rapid prototyping platform focused on numerical calculations mainly corcerned with simulations of natural phenomena. It provides a set of common functionalities and interfaces with a number of state-of-the-art open source packages to combine their power seamlessly under a single development environment.
 
 The most important features:
 
-* Various dictionary classes that enhance the core behaviour of the built-in `dict` type. The top of the cake is the `DeepDict` class, which offers a different behaviour for nested dictionaries by applying a self replicating defalt factory.
+* Numba-jitted classes and an extendible factory to define and manipulate vectors and tensors.
 
-* A set of tools for metaprogramming. The use cases include declaring custom abstract class properties, using metaclasses to avoid unwanted code conflicts, assuring the implementation of abstract methods at design time, etc.
+* Classes to define and solve linear and nonlinear optimization problems.
 
-* Decorators, wrappers and other handy developer tools.
+* A set of array routines for fast prorotyping, including random data  creation to assure well posedness, or other properties of test problems.
 
 ## **Documentation**
 
