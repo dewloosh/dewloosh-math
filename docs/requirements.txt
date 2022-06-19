@@ -3,4 +3,5 @@ nbsphinx
 sphinx-gallery
 sphinx_copybutton
 sphinxcontrib-bibtex==1.0.0
+nbsphinx-link
 furo
