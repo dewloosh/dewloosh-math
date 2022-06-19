@@ -2,6 +2,7 @@
 import unittest
 import numpy as np
 
+from dewloosh.math.array import atleast2d
 from dewloosh.math.function import Function, Equality, InEquality
 from dewloosh.math.optimize import LinearProgrammingProblem as LPP, \
     DegenerateProblemError, NoSolutionError
@@ -11,20 +12,15 @@ import sympy as sy
 class TestLPP(unittest.TestCase):
 
     def test_unique_solution(self):
-        """
-        Example for unique solution
-        (0, 6, 0, 4) --> 10
-        The following order automatically creates
-        a feasble solution : [0, 2, 3, 1]
-        """
-        variables = ['x1', 'x2', 'x3', 'x4']
-        x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
-        obj1 = Function(3*x1 + 9*x3 + x2 + x4, variables=syms)
-        eq11 = Equality(x1 + 2*x3 + x4 - 4, variables=syms)
-        eq12 = Equality(x2 + x3 - x4 - 2, variables=syms)
-        P1 = LPP(cost=obj1, constraints=[eq11, eq12], variables=syms)
-        x = P1.solve(order=[0, 2, 3, 1], raise_errors=True)['x']
-        _x = np.array([0., 6., 0., 4.])
+        x1, x2 = sy.symbols(['x1', 'x2'], positive=True)
+        syms = [x1, x2]
+        f = Function(x1 + x2, variables=syms)
+        ieq1 = InEquality(x1 - 1, op='>=', variables=syms)
+        ieq2 = InEquality(x2 - 1, op='>=', variables=syms)
+        ieq3 = InEquality(x1 + x2 - 4, op='<=', variables=syms)
+        lpp = LPP(cost=f, constraints=[ieq1, ieq2, ieq3], variables=syms)
+        x = atleast2d(lpp.solve()['x'])
+        _x = np.array([1.0, 1.0])
         assert np.all(np.isclose(_x, x))
     
     def test_degenerate_solution(self):
