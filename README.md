@@ -44,7 +44,7 @@ Once the enviroment is created, activate it via typing
 
 ## **Crash Course**
 
-## Linear Algebra
+### Linear Algebra
 
 Define a reference frame (B) relative to the ambient frame (A):
 ```python
