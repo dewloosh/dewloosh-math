@@ -7,3 +7,4 @@ dewloosh.math API reference
     api_lp
     api_ga
     api_array
+    api_graph

@@ -50,11 +50,20 @@ Contents
 --------
 
 .. toctree::
-   :maxdepth: 3
+    :caption: Contents
+    :maxdepth: 3
    
-   user_guide
-   notebooks
-   api
+    user_guide
+    notebooks
+
+API
+---
+
+.. toctree::
+    :caption: API
+    :maxdepth: 3
+   
+    api
    
 Indices and tables
 ------------------

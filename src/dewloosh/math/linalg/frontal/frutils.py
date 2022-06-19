@@ -7,7 +7,7 @@ from numba import jit
 def max_frontwidth_bulk(topo: np.ndarray, path: np.ndarray, nDOF: int = 1):
     nV = np.max(np.abs(topo))
     nE, nN = topo.shape
-    ndest = np.zeros(nV, dtype=np.int8)
+    ndest = np.zeros(nV, dtype=np.int64)
     maxwidth = 0
     width = 0
     for i in range(nE):
@@ -26,7 +26,7 @@ def max_frontwidth_bulk(topo: np.ndarray, path: np.ndarray, nDOF: int = 1):
 @jit(nopython=True, nogil=True)
 def max_frontwidth_flattened(topof):
     nV = np.max(np.abs(topof))
-    ndest = np.zeros(nV, dtype=np.int8)
+    ndest = np.zeros(nV, dtype=np.int64)
     maxwidth = 0
     width = 0
     for i in range(len(topof)):
@@ -46,7 +46,7 @@ def flatind(row: int, col: int, ncols: int, base: int = 0):
 
 @jit(nopython=True, nogil=True)
 def flatsize_sym(n: int):
-    return np.int32((n * n - n) / 2 + n + 0.1)
+    return np.int64((n * n - n) / 2 + n + 0.1)
 
 
 @jit(nopython=True, nogil=True)
@@ -58,7 +58,7 @@ def flatind_sym(row: int, col: int, base: int = 0):
 def flatind_bulk(rows: np.ndarray, cols: np.ndarray, base: int = 0):
     ncols = np.max(cols) - base
     ncase, ndata = cols.shape
-    res = np.zeros((ncase, ndata), 0, dtype=np.int32)
+    res = np.zeros((ncase, ndata), 0, dtype=np.int64)
     for i in range(ncase):
         for j in range(ndata):
             res[i, j] = flatind(rows[i, j], cols[i, j], ncols, base)
@@ -69,7 +69,7 @@ def flatind_bulk(rows: np.ndarray, cols: np.ndarray, base: int = 0):
 def flatind_flattened(rows: np.ndarray, cols: np.ndarray, base: int = 0):
     ncols = np.max(cols) - base
     ndata = len(cols)
-    res = np.zeros(ndata, 0, dtype=np.int32)
+    res = np.zeros(ndata, 0, dtype=np.int64)
     for i in range(ndata):
         res[i] = flatind(rows[i], cols[i], ncols, base)
     return res

@@ -10,14 +10,14 @@ from ..sparse.graph import pseudo_peripheral_nodes
 def optimal_node_order(adj: CSR):
     nN = len(adj.indptr) - 1  # number of nodes
     roots = pseudo_peripheral_nodes(adj)
-    renum = np.full(nN, -1, dtype=np.int32)
-    order = np.arange(0, nN, dtype=np.int32)
+    renum = np.full(nN, -1, dtype=np.int64)
+    order = np.arange(0, nN, dtype=np.int64)
     minwidth = nN
 
     # 0  == virgin
     # -1 == eliminated
     # n  == age
-    status = np.zeros(nN, dtype=np.int32)
+    status = np.zeros(nN, dtype=np.int64)
 
     def iseliminated(status, i):
         return status[i] < 0
@@ -52,7 +52,7 @@ def optimal_node_order(adj: CSR):
     def get_costs(adj, status, actives):
         # measure cost of the elimination of active nodes
         nA = len(actives)
-        costs = np.full(nA, -1, dtype=np.float32)
+        costs = np.full(nA, -1, dtype=np.float64)
         for iA in range(nA):
             costs[iA] = get_cost(adj, status, actives[iA])
         return costs
@@ -133,7 +133,7 @@ def optimal_elimination_order(adj: CSR, topo: CSR):
     # reorder elements
     nN = len(adj.indptr) - 1  # number of nodes
     nE = len(topo.indptr) - 1  # number of elements
-    eorder = np.full(nE, -1, dtype=np.int32)
+    eorder = np.full(nE, -1, dtype=np.int64)
     cE = 0
     for iN in range(nN):
         for iE in range(nE):
@@ -239,6 +239,6 @@ if __name__ == '__main__':
     topo_signed_1 = np.array([[-1, -2, -3, 4, 5, 6, 10, 11, 12],
                               [4, 5, 6, -13, -14, -15, 7, 8, 9],
                               [-4, -5, -6, -7, -8, -9, -10, -11, -12]])
-    path_1 = np.arange(3, dtype=np.int32)
+    path_1 = np.arange(3, dtype=np.int64)
     maxwidth_topo_1 = max_frontwidth_bulk(topo_signed_1, path_1)
     """

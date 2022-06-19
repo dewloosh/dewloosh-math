@@ -2,3 +2,4 @@ hypothesis
 flake8 
 pytest 
 pytest-cov
+networkx

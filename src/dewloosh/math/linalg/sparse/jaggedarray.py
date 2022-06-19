@@ -6,8 +6,6 @@ from awkward import unflatten as build
 import numpy as np
 
 from .utils import count_cols
-from ...arraysetops import unique2d
-
 
 def shape(arr): return arr.shape[:2]
 def cut(shp): return np.full(shp[0], shp[1], dtype=np.int64)
@@ -15,11 +13,55 @@ def flatten(arr): return arr.flatten()
 
 
 class JaggedArray(ak.Array):
-    """Currently it only supports 2 dimensional arrays."""
+    """
+    A numba-jittable class that handles matrices with a variable 
+    number of columns per row.
+    
+    The class is actually an interface to `awkward.Array`,
+    with some additional features, specific to 2d jagged arrays.
+    
+    Parameters
+    ----------
+    data : Iterable
+        Some jagged data.
+    
+    behaviour
+        Passed foreard to `awkward.Array`, see it's documentation
+        for the details.
+        
+    with_name
+        Passed foreard to `awkward.Array`, see it's documentation
+        for the details.
+        
+    check_valid
+        Passed foreard to `awkward.Array`, see it's documentation
+        for the details.
+        
+    cache
+        Passed foreard to `awkward.Array`, see it's documentation
+        for the details.
+        
+    kernels
+        Passed foreard to `awkward.Array`, see it's documentation
+        for the details.
+        
+    cuts : Iterable
+        An iterable that tells how to unflatten an 1d array into a 
+        2d jagged shape.
+        
+    Returns
+    -------
+    JaggedArray
+                
+    Examples
+    --------
+    >>> from dewloosh.math.sparse import JaggedArray
+    
+    """
 
     def __init__(self, data, behavior=None, with_name=None,
                  check_valid=False, cache=None, kernels=None,
-                 cuts=None):
+                 cuts=None) -> 'JaggedArray':
         if isinstance(data, np.ndarray):
             nD = len(data.shape)
             assert nD <= 2, "Only 2 dimensional arrays are supported!"
@@ -57,6 +99,9 @@ class JaggedArray(ak.Array):
         return count_cols(self)
 
     def flatten(self, return_cuts=False):
+        """
+        Returns the flattened equivalent of the array.
+        """
         if return_cuts:
             return self.widths(), ak.flatten(self)
         else:

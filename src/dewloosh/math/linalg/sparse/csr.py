@@ -14,14 +14,14 @@ __all__ = ['csr_matrix']
 
 class csr_matrix(object):
     """
-    Numba-jittable python class for a sparse matrix in csr format. 
+    Numba-jittable Python class for a sparse matrix in CSR format. 
 
     Parameters
     ----------
     data    
         Contains the non-zero values of the matrix, in the order in which
         they would be encountered if we walked along the rows left to
-        right and top to bottom. If this is a csc matrix, the walk
+        right and top to bottom. If this is a CSC matrix, the walk
         happens along the columns.
 
     indices
@@ -157,31 +157,3 @@ def box_csr(typ, val, c):
                                                (data_obj, indices_obj,
                                                 indptr_obj, shape_obj))
     return matrix_obj
-
-
-if __name__ == '__main__':
-    from numba import njit
-
-    @njit
-    def csr_row(csr: csr_matrix, i: int):
-        return csr.row(i)
-    
-    @njit
-    def csr_data(csr: csr_matrix):
-        return csr.data
-
-    @njit
-    def csr_m(dtype=np.float64):
-        return csr_matrix_nb(dtype)
-
-    np.random.seed = 0
-    mat = csr_scipy(np.random.rand(10, 12) > 0.8, dtype=np.int64)
-    print(mat.A)
-
-    csr = csr_matrix(mat)
-    sdata, scols = csr_row(csr, 0)
-    print(sdata, scols)
-    
-    e = csr_matrix.eye(3)
-
-    print(csr_data(csr))

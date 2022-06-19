@@ -9,10 +9,10 @@ def backsub_fr(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray,
                glob_to_front: np.ndarray, glob_to_width: np.ndarray):
     nEQ, maxwidth = A.shape
     nEQ, nRHS = B.shape
-    X = np.zeros((nEQ, nRHS), dtype=np.float32)
-    R = np.zeros((nEQ, nRHS), dtype=np.float32)
-    resid = np.zeros(nRHS, dtype=np.float32)
-    X_fr = np.zeros((maxwidth, nRHS), dtype=np.float32)
+    X = np.zeros((nEQ, nRHS), dtype=np.float64)
+    R = np.zeros((nEQ, nRHS), dtype=np.float64)
+    resid = np.zeros(nRHS, dtype=np.float64)
+    X_fr = np.zeros((maxwidth, nRHS), dtype=np.float64)
     for iEQ in range(nEQ - 1, -1, -1):
         gind = eqpath[iEQ]
         ifront = glob_to_front[gind]

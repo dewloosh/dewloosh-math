@@ -2,6 +2,8 @@
 import numpy as np
 from numpy.linalg import LinAlgError
 from numba import njit, guvectorize
+from time import time
+
 __cache = True
 
 
@@ -22,8 +24,8 @@ def solve(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray = None,
                 B = B.reshape((nEQ, 1))
             pre = presc_val is not None
             if not pre:
-                presc_bool = np.zeros((nEQ,), dtype=np.int32)
-                presc_val = np.zeros((nEQ,), dtype=np.float32)
+                presc_bool = np.zeros((nEQ,), dtype=np.int64)
+                presc_val = np.zeros((nEQ,), dtype=np.float64)
             if inplace:
                 res = backsub(*fnc(A, B, presc_bool, presc_val),
                               presc_bool, presc_val)
@@ -52,8 +54,8 @@ def reduce(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray = None,
         try:
             if presc_bool is None:
                 nEQ = len(B)
-                presc_bool = np.zeros((nEQ,), dtype=np.int32)
-                presc_val = np.zeros((nEQ,), dtype=np.float32)
+                presc_bool = np.zeros((nEQ,), dtype=np.int64)
+                presc_val = np.zeros((nEQ,), dtype=np.float64)
             if inplace:
                 return fnc(A, B, presc_bool, presc_val)
             else:
@@ -138,9 +140,9 @@ def _GaussJordan(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray,
 def backsub(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray,
             presc_val: np.ndarray):
     nEQ, nRHS = B.shape
-    X = np.zeros((nEQ, nRHS), dtype=np.float32)
-    R = np.zeros((nEQ, nRHS), dtype=np.float32)
-    resid = np.zeros(nRHS, dtype=np.float32)
+    X = np.zeros((nEQ, nRHS), dtype=np.float64)
+    R = np.zeros((nEQ, nRHS), dtype=np.float64)
+    resid = np.zeros(nRHS, dtype=np.float64)
     for iEQ in range(nEQ - 1, -1, -1):
         pivot = A[iEQ, iEQ]
         resid[:] = B[iEQ]
@@ -155,68 +157,35 @@ def backsub(A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray,
     return X, R
 
 
-if __name__ == '__main__':
-    from time import time
-
-    A = np.array([[3, 1, 2], [1, 1, 1], [2, 1, 2]], dtype=np.float32)
-    B = np.array([11, 6, 10], dtype=np.float32)
-    presc_bool = np.full(B.shape, False, dtype=np.bool)
-    presc_val = np.zeros(B.shape, dtype=np.float32)
-
-    x_J = solve(A, B, method='Jordan')
-    x_GJ = solve(A, B, method='Gauss-Jordan')
-    x_np = np.linalg.solve(A, B)
-    x_np_jit = solve(A, B, method='numpy')
-    A_GJ, b_GJ = reduce(A, B, method='Gauss-Jordan')
-    A_J, b_J = reduce(A, B, method='Jordan')
-
-    B = np.stack([B, B], axis=1)
-    X_J = solve(A, B, method='Jordan')
-    X_GJ = solve(A, B, method='Gauss-Jordan')
-
-    A = np.array([[1, 2, 1, 1], [2, 5, 2, 1], [1, 2, 3, 2], [1, 1, 2, 2]],
-                 dtype=np.float32)
-    b = np.array([12, 15, 22, 17], dtype=np.float32)
-    ifpre = np.array([0, 1, 0, 0], dtype=np.int32)
-    fixed = np.array([0, 2, 0, 0], dtype=np.float32)
-    A_GJ, b_GJ = reduce(A, b, ifpre, fixed, 'Gauss-Jordan')
-    A_J, b_J = reduce(A, b, ifpre, fixed, 'Jordan')
-    X_GJ, r_GJ = solve(A, b, ifpre, fixed, 'Gauss-Jordan')
-    X_J, r_J = solve(A, b, ifpre, fixed, 'Jordan')
-
-    def test_1(A, b, n=100):
-        times = []
-        
-        # measuring solution 1
-        ts = time()
-        for i in range(n):
-            solve(A, b, method='Jordan')
-        te = time()
-        times.append((te-ts)*1000)
-        
-        # measuring solution 2
-        ts = time()
-        for i in range(n):
-            np.linalg.solve(A, b)
-        te = time()
-        times.append((te-ts)*1000)
-        
-        # measuring solution 3
-        ts = time()
-        for i in range(n):
-            solve(A, b, method='numpy')
-        te = time()
-        times.append((te-ts)*1000)
-        
-        # measuring solution 4
-        ts = time()
-        for i in range(n):
-            solve(A, b, method='Gauss-Jordan')
-        te = time()
-        times.append((te-ts)*1000)
-        
-        return times
-
-    A = np.array([[3, 1, 2], [1, 1, 1], [2, 1, 2]], dtype=np.float32)
-    b = np.array([11, 6, 10], dtype=np.float32)
-    print(test_1(A, b, 1000))
+def _measure(A, b, n=100):
+    times = []
+    
+    # measuring solution 1
+    ts = time()
+    for i in range(n):
+        solve(A, b, method='Jordan')
+    te = time()
+    times.append((te-ts)*1000)
+    
+    # measuring solution 2
+    ts = time()
+    for i in range(n):
+        np.linalg.solve(A, b)
+    te = time()
+    times.append((te-ts)*1000)
+    
+    # measuring solution 3
+    ts = time()
+    for i in range(n):
+        solve(A, b, method='numpy')
+    te = time()
+    times.append((te-ts)*1000)
+    
+    # measuring solution 4
+    ts = time()
+    for i in range(n):
+        solve(A, b, method='Gauss-Jordan')
+    te = time()
+    times.append((te-ts)*1000)
+    
+    return times

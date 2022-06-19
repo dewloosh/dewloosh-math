@@ -6,4 +6,5 @@ Notebooks
     
     _notebooks/lpp
     _notebooks/genetic
+    _notebooks/graph
     

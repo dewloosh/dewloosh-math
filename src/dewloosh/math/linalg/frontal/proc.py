@@ -15,15 +15,15 @@ def frontal_sym_bulk_uniform(A: np.ndarray, topology: np.ndarray,
     topology += 1
     topo_sig = signed_topo_bulk(topology, epath)
     maxwidth = max_frontwidth_bulk(topo_sig, epath)
-    A_front = np.zeros(flatsize_sym(maxwidth), dtype=np.float32)
-    B_front = np.zeros((maxwidth, nRHS), dtype=np.float32)
-    front_to_glob = np.zeros(maxwidth, dtype=np.int32)
-    loc_to_front = np.zeros(nXE, dtype=np.int32)
-    lhs = np.zeros((nEQ, maxwidth), dtype=np.float32)
-    rhs = np.zeros((nEQ, nRHS), dtype=np.float32)
-    glob_to_width = np.zeros(nEQ, dtype=np.int32)
-    glob_to_front = np.zeros(nEQ, dtype=np.int32)
-    eqpath = np.zeros(nEQ, dtype=np.int32)
+    A_front = np.zeros(flatsize_sym(maxwidth), dtype=np.float64)
+    B_front = np.zeros((maxwidth, nRHS), dtype=np.float64)
+    front_to_glob = np.zeros(maxwidth, dtype=np.int64)
+    loc_to_front = np.zeros(nXE, dtype=np.int64)
+    lhs = np.zeros((nEQ, maxwidth), dtype=np.float64)
+    rhs = np.zeros((nEQ, nRHS), dtype=np.float64)
+    glob_to_width = np.zeros(nEQ, dtype=np.int64)
+    glob_to_front = np.zeros(nEQ, dtype=np.int64)
+    eqpath = np.zeros(nEQ, dtype=np.int64)
     frontwidth = 0
 
     # ASSEMBLY & ELIMINATION
@@ -160,7 +160,7 @@ if __name__ == '__main__':
         cond = (condX | condY) & condZ
         nIDs = np.where(cond)[0]
         if solver == 'numpy':
-            p = np.array([1e12, 1e12, 1e12], dtype=np.float32)
+            p = np.array([1e12, 1e12, 1e12], dtype=np.float64)
             penalties = {nID: p for nID in nIDs}
         else:
             disps = {}
@@ -173,7 +173,7 @@ if __name__ == '__main__':
         if case == 0:
             nIDs = np.where(condZ)[0]
             fz = (-10/10000)*Lx*Ly/len(nIDs)
-            fp = np.array([0, 0, fz], dtype=np.float32)
+            fp = np.array([0, 0, fz], dtype=np.float64)
             loads = {nID: fp for nID in nIDs}
         elif case == 1:
             condZ = (abs(coord[:, 2] - Lz/2) < 0.001)
@@ -198,14 +198,14 @@ if __name__ == '__main__':
             nTOTV = len(points) * 3
 
             # essential boundary conditions
-            presc_bool = np.zeros(nTOTV, dtype=np.int32)
-            presc_val = np.zeros(nTOTV, dtype=np.float32)
+            presc_bool = np.zeros(nTOTV, dtype=np.int64)
+            presc_val = np.zeros(nTOTV, dtype=np.float64)
             for dID, dval in disps.items():
                 presc_val[dID] = dval
                 presc_bool[dID] = 1
 
             # natural boundary conditions
-            RHS = np.zeros((len(points), 3), dtype=np.float32)
+            RHS = np.zeros((len(points), 3), dtype=np.float64)
             for nID, f in loads.items():
                 RHS[nID] = f
 
@@ -237,14 +237,14 @@ if __name__ == '__main__':
             nTOTV = len(points) * 3
 
             # essential boundary conditions
-            presc_bool = np.zeros(nTOTV, dtype=np.int32)
-            presc_val = np.zeros(nTOTV, dtype=np.float32)
+            presc_bool = np.zeros(nTOTV, dtype=np.int64)
+            presc_val = np.zeros(nTOTV, dtype=np.float64)
             for dID, dval in disps.items():
                 presc_val[dID] = dval
                 presc_bool[dID] = 1
 
             # natural boundary conditions
-            RHS = np.zeros((len(points), 3), dtype=np.float32)
+            RHS = np.zeros((len(points), 3), dtype=np.float64)
             for nID, f in loads.items():
                 RHS[nID] = f
 
@@ -258,14 +258,14 @@ if __name__ == '__main__':
             nTOTV = len(points) * 3
 
             # essential boundary conditions
-            presc_bool = np.zeros(nTOTV, dtype=np.int32)
-            presc_val = np.zeros(nTOTV, dtype=np.float32)
+            presc_bool = np.zeros(nTOTV, dtype=np.int64)
+            presc_val = np.zeros(nTOTV, dtype=np.float64)
             for dID, dval in disps.items():
                 presc_val[dID] = dval
                 presc_bool[dID] = 1
 
             # natural boundary conditions
-            RHS = np.zeros((len(points), 3), dtype=np.float32)
+            RHS = np.zeros((len(points), 3), dtype=np.float64)
             for nID, f in loads.items():
                 RHS[nID] = f
 
