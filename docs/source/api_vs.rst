@@ -2,6 +2,8 @@
 Linear Algebra
 ==============
 
+.. _LinAlg:
+
 These classes are meant to provide a usable representation of a vectorspace.
 At the moment, the capabilities are limited to vectors and their transformations 
 in coordinate frames with orthonormal basis vectors, but allows for arbitrary 
@@ -90,12 +92,8 @@ and the base vectors as
 Vectors
 =======
 
-.. _VectorBase:
-
 .. autoclass:: dewloosh.math.linalg.vector.VectorBase
     :members:
-
-.. _Vector:
 
 .. autoclass:: dewloosh.math.linalg.Vector
     :members:
@@ -103,30 +101,20 @@ Vectors
 Frames
 ======
 
-.. _ReferenceFrame:
-
 .. autoclass:: dewloosh.math.linalg.ReferenceFrame
     :members:
 
 Arrays
 ======
 
-.. _ArrayBase:
-
 .. autoclass:: dewloosh.math.linalg.array.ArrayBase
     :members:
-
-.. _Array:
 
 .. autoclass:: dewloosh.math.linalg.array.Array
     :members:
 
-.. _JaggedArray:
-
 .. autoclass:: dewloosh.math.linalg.sparse.JaggedArray
     :members:
-
-.. _csr_matrix:
 
 .. autoclass:: dewloosh.math.linalg.sparse.csr_matrix
     :members:
