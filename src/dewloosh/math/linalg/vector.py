@@ -11,6 +11,8 @@ __all__ = ['Vector']
 
 
 class VectorBase(ArrayBase):
+    """Base class for vector backends. Use it like if it 
+    was a ``numpy.ndarray`` instance."""
 
     def __new__(subtype, shape=None, dtype=float, buffer=None,
                 offset=0, strides=None, order=None, frame=None):
@@ -38,10 +40,25 @@ class VectorBase(ArrayBase):
 
 class Vector(Array):
     """
-    Extends `NumPy`'s `ndarray` class to handle arrays with associated
+    Extends `NumPy`'s ``ndarray`` class to handle arrays with associated
     reference frames. The class also provides a mechanism to transform
-    vectors between different frames.
-        
+    vectors between different frames. Use it like if it was a ``numpy.ndarray`` 
+    instance.
+    
+    All parameters are identical to those of ``numpy.ndarray``, except that
+    this class allows to specify an embedding frame.
+    
+    Parameters
+    ----------
+    args : Tuple, Optional.
+        Positional arguments forwarded to `numpy.ndarray`.
+    
+    frame : ndarray, Optional.
+        The reference frame the vector is represented by its coordinates.
+    
+    kwargs : Dict, Optional.
+        Keyword arguments forwarded to `numpy.ndarray`.
+    
     Examples
     --------
     Import the necessary classes:
@@ -77,6 +94,12 @@ class Vector(Array):
     
     >>> vC = Vector(vA.show(C), frame=C)
     
+    See Also
+    --------
+    :class:`dewloosh.math.linalg.vector.VectorBase`
+    :class:`dewloosh.math.linalg.array.Array`
+    :class:`dewloosh.math.linalg.frame.frame.ReferenceFrame`
+    
     """
 
     _array_cls_ = VectorBase
@@ -93,10 +116,12 @@ class Vector(Array):
 
     @property
     def array(self) -> VectorBase:
+        """Returns the coordinates of the vector."""
         return self._array
 
     @array.setter
     def array(self, value):
+        """Sets the coordinates of the vector."""
         buf = np.array(value)
         assert buf.shape == self._array.shape
         self._array = self._array_cls_(shape=buf.shape, buffer=buf,

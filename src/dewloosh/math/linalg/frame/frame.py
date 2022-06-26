@@ -19,6 +19,19 @@ class ReferenceFrame(Array):
     The class is basically an interface on the `ReferenceFrame` class 
     in `sympy.physics.vector`, with a similarly working `orient_new` function.
 
+    Parameters
+    ----------
+    axes : ndarray, Optional.
+        2d numpy array of floats specifying cartesian reference frames.
+        Dafault is None.
+        
+    parent : ReferenceFrame, Optional.
+        A parent frame in which this the current frame is embedded in.
+        Default is False.
+    
+    dim : int, Optional
+        Dimension of the mesh. Deafult is 3.
+            
     Examples
     --------
     Define a standard Cartesian frame and rotate it around axis 'Z'
@@ -122,7 +135,7 @@ class ReferenceFrame(Array):
         If `source` is not `None`, then T=self.
 
         If `target` is not `None`, then S=self.
-
+        
         Parameters
         ----------
         source : 'ReferenceFrame', Optional

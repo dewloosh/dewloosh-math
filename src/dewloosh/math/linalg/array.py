@@ -12,6 +12,11 @@ __all__ = ['ArrayBase', 'Array']
 
 
 class ArrayBase(ABC_Safe, np.ndarray):
+    """
+    Base backend class for array-like classes. Use it like if it was
+    a ``numpy.ndarray`` instance.
+    
+    """
 
     def __new__(subtype, shape=None, dtype=float, buffer=None,
                 offset=0, strides=None, order=None, frame=None,
@@ -53,6 +58,11 @@ class ArrayBase(ABC_Safe, np.ndarray):
 
 
 class Array(NDArrayOperatorsMixin, Wrapper):
+    """
+    Base frontend class for array-like classes. Use it like if it 
+    was a ``numpy.ndarray`` instance.
+    
+    """
 
     _array_cls_ = ArrayBase
 

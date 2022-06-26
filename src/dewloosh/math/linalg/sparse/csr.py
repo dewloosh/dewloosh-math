@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
+from typing import Union
 import numpy as np
 from numba.core import types as nbtypes, cgutils
 from numba.extending import typeof_impl, models, make_attribute_wrapper, \
     register_model, box, unbox, NativeValue, overload_method
 from scipy.sparse import issparse
-from scipy.sparse import csr_matrix as csr_scipy
+from scipy.sparse import csr_matrix as csr_scipy, spmatrix
 
 from .utils import get_shape_sp
 
 
 __all__ = ['csr_matrix']
+
+
+SparseLike = Union[spmatrix, np.ndarray]
 
 
 class csr_matrix(object):
@@ -18,22 +22,40 @@ class csr_matrix(object):
 
     Parameters
     ----------
-    data    
+    data : SparseLike    
         Contains the non-zero values of the matrix, in the order in which
         they would be encountered if we walked along the rows left to
         right and top to bottom. If this is a CSC matrix, the walk
         happens along the columns.
 
-    indices
+    indices : np.ndarray, Optional.
         The indices of the columns (rows) during the walk.
+        Default is None.
 
-    indptr
+    indptr : np.ndarray, Optional.
         Stores row (column) boundaries.
+        Default is None.
 
+    shape : Tuple, Optinal.
+        Default is None.
+        
+    Note
+    ----
+    At the moment, this class does not support `NumPy`'s array protocoll.
+    If you want this to be the argument to a numpy function, use the 
+    :func:`to_scipy` method of this class.
+
+    Examples
+    --------
+    >>> from dewloosh.math.linalg.sparse import csr_matrix
+    >>> csr = csr_matrix()
+    
+    >>> from numba import njit
+    
     """
 
-    def __init__(self, data: None, indices: np.array = None,
-                 indptr: np.array = None, shape: tuple = None):
+    def __init__(self, data: SparseLike, indices: np.ndarray = None,
+                 indptr: np.ndarray = None, shape: tuple = None):
         self.sptype = csr_scipy
         if issparse(data):
             data = data.tocsr()
@@ -55,23 +77,26 @@ class csr_matrix(object):
                 shape = get_shape_sp(indptr)
             self.shape = shape
 
-    def to_scipy(self):
+    def to_scipy(self) -> csr_scipy:
+        """
+        Returns data as a `SciPy` object.
+        """
         return csr_scipy((self.data, self.indices, self.indptr), shape=self.shape)
-    
+
     @staticmethod
-    def eye(N: int, *args, **kwargs):
+    def eye(N: int, *args, **kwargs) -> 'csr_matrix':
         indices = np.arange(N)
         indptr = np.arange(N+1)
         data = np.ones(N, dtype=float)
         return csr_matrix(data=data, indices=indices, indptr=indptr, shape=(N, N))
 
-    def first_nonzero_col(self):
+    def first_nonzero_col(self) -> int:
         return self.indices[self.indptr[:-1]]
 
-    def new_rows_per_col(self):
+    def new_rows_per_col(self) -> np.ndarray:
         return np.bincount(self.first_nonzero_col(), minlength=self.shape[1])
 
-    def row(self, i: int = 0):
+    def row(self, i: int = 0) -> np.ndarray:
         """Returns the values and colum indices of the i-th row."""
         return self.data[self.indptr[i]: self.indptr[i+1]], \
             self.indices[self.indptr[i]: self.indptr[i+1]]

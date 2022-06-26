@@ -35,7 +35,8 @@ class LinearProgrammingResult(Enum):
     
 
 class LinearProgrammingProblem:
-    """A lightweight class to handle general linear programming problems. It gaps the 
+    """
+    A lightweight class to handle general linear programming problems. It gaps the 
     bridge between the general form and the standard form. The class accepts
     symbolic expressions, but this should not be expected to be too fast. 
     For problems starting from medium size, it is suggested to use the 

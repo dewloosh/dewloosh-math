@@ -86,7 +86,7 @@ extensions = [
     'sphinx.ext.autodoc',
 
     # to enable cross referencing other documents on the internet
-    # 'sphinx.ext.intersphinx',
+    'sphinx.ext.intersphinx',
 
     # Napoleon is a extension that enables Sphinx to parse both NumPy and Google style docstrings
     'sphinx.ext.napoleon',

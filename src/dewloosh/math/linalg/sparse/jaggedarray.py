@@ -56,6 +56,9 @@ class JaggedArray(ak.Array):
     Examples
     --------
     >>> from dewloosh.math.sparse import JaggedArray
+    >>> jarr = JaggedArray([[1, 2], [1, 2, 3]])
+    >>> jarr.widths()
+    [2, 3]
     
     """
 
@@ -90,28 +93,36 @@ class JaggedArray(ak.Array):
         super().__init__(data, behavior=behavior, with_name=with_name,
                          check_valid=check_valid, cache=cache, kernels=kernels)
 
-    def is_jagged(self):
+    def is_jagged(self) -> bool:
+        """Returns True if the layout of the matrix is jagged, False if it is not."""
         widths = self.widths()
         return not np.all(widths == widths[0])
 
-    def widths(self):
+    def widths(self) -> np.ndarray:
+        """Returns the number of columns for each row."""
         assert self.ndim == 2, "Only 2 dimensional arrays are supported!"
         return count_cols(self)
 
     def flatten(self, return_cuts=False):
         """
         Returns the flattened equivalent of the array.
+        
+        Parameters
+        ----------
+        return_cuts : bool, Optional
+            If True, cuts are returned. These can be used later to revert
+            the operation. Default is False.
+            
+        Returns
+        -------
+        np.ndarray
+            The flattened data as an 1d numpy array.
+        
+        np.ndarray, Optional.
+            The cuts to use to reconstruct the jagged representation.
+        
         """
         if return_cuts:
             return self.widths(), ak.flatten(self)
         else:
             return ak.flatten(self)
-
-    def __array_function__(self, func, types, args, kwargs):
-        # NOTE Moved to TopologyArray
-        # if func == np.unique:
-        #    return unique2d(*args, **kwargs)
-        return super().__array_function__(func, types, args, kwargs)
-
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return super().__array_ufunc__(ufunc, method, *inputs, **kwargs)

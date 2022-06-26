@@ -205,34 +205,3 @@ def pseudo_peripheral_nodes(adj: csr_matrix):
             res[:-1] = RLS[len(RLS) - 1]
             res[-1] = RLS[0][0]
             return res
-
-
-if __name__ == '__main__':
-    pass
-    """
-    from pyoneer.mechanics.fem import Uniform3D
-
-    # geometry
-    Lx = 100.0
-    Ly = 100.0
-    Lz = 100.0
-
-    # mesh control
-    nx = 21
-    ny = 21
-    nz = 21
-
-    # assembly
-    assembly = Uniform3D((Lx, Ly, Lz), (nx, ny, nz))
-    points = assembly.points()
-
-    # connectivity and topology
-    conn = assembly.element_node_numbering()
-    topo = assembly.element_dof_numbering()
-    G = assembly.topology('as_graph', mode = 'node')
-    adj = assembly.adjacency(G)
-    adj_csr_matrix = G.adjacency_matrix(sparse = True)
-    rls_csr_matrix = rooted_level_structure(adj_csr_matrix)
-    ppnodes = pseudo_peripheral_nodes(adj_csr_matrix)
-    conn_csr_matrix = assembly.connectivity_matrix(sparse = True)
-    """

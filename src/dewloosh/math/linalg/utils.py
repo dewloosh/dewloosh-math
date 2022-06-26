@@ -17,6 +17,7 @@ def show_vectors(dcm: np.ndarray, arr: np.ndarray):
         res[i] = dcm @ arr[i, :]
     return res
 
+
 @njit(nogil=True, parallel=True, cache=__cache)
 def show_vectors(dcm: np.ndarray, arr: np.ndarray):
     res = np.zeros_like(arr)
