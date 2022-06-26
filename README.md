@@ -1,6 +1,6 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dewloosh/dewloosh-core/main?labpath=examples%2Flpp.ipynb?urlpath=lab)
 [![CircleCI](https://circleci.com/gh/dewloosh/dewloosh-math.svg?style=shield)](https://circleci.com/gh/dewloosh/dewloosh-math) 
-[![Documentation Status](https://readthedocs.org/projects/dewloosh-math/badge/?version=latest)](https://nddict.readthedocs.io/en/latest/?badge=latest) 
+[![Documentation Status](https://readthedocs.org/projects/dewloosh-math/badge/?version=latest)](https://dewloosh-math.readthedocs.io/en/latest/?badge=latest) 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://badge.fury.io/py/dewloosh.math.svg)](https://pypi.org/project/dewloosh.math) 
 
