@@ -27,11 +27,11 @@ class VectorBase(ArrayBase):
         self._frame = getattr(obj, '_frame', None)
 
     @property
-    def frame(self):
+    def frame(self) -> Frame:
         return self._frame
 
     @frame.setter
-    def frame(self, value):
+    def frame(self, value: Frame):
         if isinstance(value, Frame):
             self._frame = value
         else:

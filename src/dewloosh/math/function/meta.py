@@ -13,8 +13,18 @@ class ABCMeta_MetaFunction(ABCMeta_Weak):
     """
 
     def __new__(metaclass, name, bases, namespace, *args, **kwargs):
-        return super().__new__(metaclass, name, bases, namespace,
-                               *args, **kwargs)
+        cls = super().__new__(metaclass, name, bases, namespace,
+                              *args, **kwargs)
+        if 'value' in namespace:
+            cls.f = namespace['value']
+            
+        if 'gradient' in namespace:
+            cls.g = namespace['gradient']
+            
+        if 'Hessian' in namespace:
+            cls.G = namespace['Hessian']
+        
+        return cls 
 
 
 class MetaFunction(metaclass=ABCMeta_MetaFunction):

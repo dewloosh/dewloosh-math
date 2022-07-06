@@ -93,11 +93,11 @@ class ReferenceFrame(Array):
             return self.parent.root()
 
     @property
-    def order(self):
+    def order(self) -> str:
         return 'row' if self._order == 0 else 'col'
 
     @property
-    def axes(self):
+    def axes(self) -> ndarray:
         """
         Returns a matrix, where each row (or column) is the component array
         of a basis vector with respect to the parent frame, or ambient
@@ -106,7 +106,7 @@ class ReferenceFrame(Array):
         return self._array
 
     @axes.setter
-    def axes(self, value):
+    def axes(self, value: ndarray):
         if isinstance(value, np.ndarray):
             if value.shape == self._array.shape:
                 self._array = value
@@ -115,7 +115,7 @@ class ReferenceFrame(Array):
         else:
             raise TypeError("Only numpy arras are supported here!")
 
-    def show(self, target: 'ReferenceFrame' = None):
+    def show(self, target: 'ReferenceFrame' = None) -> ndarray:
         """
         Returns the components of the current frame in a target frame.
         If the target is None, the componants are returned in the ambient frame.

@@ -92,7 +92,7 @@ class JaggedArray(ak.Array):
             #data = ak.concatenate(list(map(lambda arr : ak.Array(arr), data)))
         super().__init__(data, behavior=behavior, with_name=with_name,
                          check_valid=check_valid, cache=cache, kernels=kernels)
-
+    
     def is_jagged(self) -> bool:
         """Returns True if the layout of the matrix is jagged, False if it is not."""
         widths = self.widths()
